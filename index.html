@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>סולם</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#14161b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="סולם">
+<link rel="apple-touch-icon" href="./icon192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Heebo:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14161b; --ink2:#1b1e25; --card:#1f232b; --line:#2c313b;
+    --chalk:#ECE7DA; --ash:#969cab; --dim:#5b616e;
+    --ember:#FF5A36; --ember-soft:#ff5a3622; --steel:#5FB8C4; --ready:#9bd16a;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--ink);color:var(--chalk);font-family:'Heebo',sans-serif}
+  body{padding-bottom:78px;min-height:100vh}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  header{padding:22px 18px 10px;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line)}
+  .logo{font-family:'Rubik';font-weight:900;font-size:30px;letter-spacing:-1px}
+  .logo b{color:var(--ember)}
+  .tag{font-size:12px;color:var(--ash);letter-spacing:.3px}
+  .view{display:none;padding:16px 16px 24px;animation:fade .25s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2.section{font-family:'Rubik';font-weight:700;font-size:13px;letter-spacing:2px;color:var(--ash);text-transform:uppercase;margin:20px 4px 10px}
+  h2.section:first-child{margin-top:4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .hero{background:linear-gradient(150deg,#23272f,#1a1d24);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:14px}
+  .date{font-size:13px;color:var(--ash);font-weight:500}
+  .focus{font-family:'Rubik';font-weight:900;font-size:26px;line-height:1.15;margin-top:4px}
+  .focus span{color:var(--ember)}
+  .hint{font-size:13px;color:var(--ash);margin-top:8px;line-height:1.5}
+  .stats{display:flex;gap:12px;margin-top:16px}
+  .stat{flex:1;background:#181b21;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+  .stat .big{font-family:var(--mono);font-weight:700;font-size:22px}
+  .stat .lbl{font-size:11px;color:var(--ash);margin-top:2px}
+  .stat .big.on{color:var(--ember)}
+  .check{display:flex;align-items:center;gap:13px;padding:13px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+  .check:last-child{border-bottom:none}
+  .box{width:24px;height:24px;border-radius:8px;border:2px solid var(--dim);flex-shrink:0;display:grid;place-items:center;transition:.18s}
+  .check.done .box{background:var(--ember);border-color:var(--ember)}
+  .box svg{width:14px;height:14px;opacity:0;transition:.18s}
+  .check.done .box svg{opacity:1}
+  .check .ctext{font-size:15px;font-weight:500}
+  .check.done .ctext{color:var(--ash);text-decoration:line-through}
+  /* ---- Exercise card ---- */
+  .exc{padding:13px 14px;margin-bottom:10px}
+  .ex-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .ex-name{font-family:'Rubik';font-weight:700;font-size:16px}
+  .ex-badge{font-family:var(--mono);font-size:11px;color:var(--ash);background:#15181d;border:1px solid var(--line);padding:3px 7px;border-radius:7px;white-space:nowrap;flex-shrink:0}
+  .ex-meta{font-size:12.5px;color:var(--steel);margin-top:4px;font-weight:500}
+  .ex-meta b{color:var(--ash);font-weight:400}
+  .ex-last{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:5px}
+  .ex-note{font-size:11.5px;color:#d9a06a;margin-top:6px;line-height:1.4}
+  .ladder{display:flex;gap:4px;margin-top:9px}
+  .rung{flex:1;height:6px;border-radius:3px;background:#23262e;border:1px solid var(--line)}
+  .rung.done{background:var(--steel);opacity:.5;border-color:transparent}
+  .rung.cur{background:var(--ember);border-color:transparent}
+  @media (prefers-reduced-motion: no-preference){.rung.cur.ready{animation:pulse 1.4s infinite}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--ember-soft)}50%{box-shadow:0 0 0 5px transparent}}
+  .sets{display:flex;gap:6px;margin-top:11px}
+  .setin{flex:1 1 0;width:0;min-width:0;height:40px;background:#15181d;border:1px solid var(--line);border-radius:9px;text-align:center;color:var(--chalk);font-family:var(--mono);font-weight:700;font-size:15px}
+  .setin::placeholder{color:#454b56}
+  .setin:focus{outline:2px solid var(--steel);outline-offset:-1px;border-color:transparent}
+  .exbtns{display:flex;gap:7px;margin-top:9px;align-items:stretch}
+  button{font-family:'Heebo';cursor:pointer;border:none;font-weight:700}
+  .btn{flex:1;background:#272b34;color:var(--chalk);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:14px;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn.go{background:var(--ember);border-color:transparent;color:#1a0f0a}
+  .btn.ghost{flex:0 0 44px;font-size:17px;color:var(--ash);padding:10px 0}
+  .btn.sm{flex:0 0 66px;background:none;color:var(--ash);font-size:13px;border-color:var(--line)}
+  .advance{background:var(--ready)!important;color:#16210a!important;border:none}
+  .done-tag{flex:1;font-size:13px;color:var(--ready);font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;background:#1b2417;border:1px solid #2c3a22;border-radius:10px}
+  /* ---- Fuel ---- */
+  .gauges{display:flex;gap:12px;margin-bottom:6px}
+  .gauge{flex:1}
+  .bar{height:12px;background:#15181d;border-radius:8px;overflow:hidden;margin-top:7px;border:1px solid var(--line)}
+  .fill{height:100%;border-radius:8px;transition:width .4s ease}
+  .glabel{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+  .glabel b{font-family:var(--mono);font-size:17px}
+  .tmuted{color:var(--ash)}
+  .cin{width:100%;background:#15181d;border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--chalk);font-size:14px;font-family:'Heebo'}
+  .cin::placeholder{color:#5b616e}
+  .cin:focus{outline:2px solid var(--steel);outline-offset:-1px;border-color:transparent}
+  .lib{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .food{position:relative;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px;text-align:right;cursor:pointer;transition:.15s}
+  .food:active{transform:scale(.97);border-color:var(--ember)}
+  .food .fn{font-size:14px;font-weight:700}
+  .food .fm{font-family:var(--mono);font-size:12px;color:var(--ash);margin-top:4px}
+  .food .fp{color:var(--steel)}
+  .cost{font-size:11px;color:var(--dim);float:left}
+  .mfrm{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:6px;background:#000a;color:#d77;border:none;font-size:15px;line-height:1;cursor:pointer;z-index:2}
+  .added{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--line);font-size:14px}
+  .added:last-child{border-bottom:none}
+  .added .num{color:var(--ash);font-size:12px}
+  .rm{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:0 6px}
+  /* ---- Progress ---- */
+  .wlog{display:flex;gap:8px;margin-top:10px}
+  .wlog input{flex:1;background:#15181d;border:1px solid var(--line);border-radius:11px;padding:11px;color:var(--chalk);font-family:var(--mono);font-size:16px;text-align:center}
+  svg.chart{width:100%;height:140px;margin-top:14px;overflow:visible}
+  .prog-item{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
+  .prog-item:last-child{border-bottom:none}
+  .prog-item .ladder{flex:0 0 52px;width:52px;margin-top:0}
+  .pi-name{flex:1;font-weight:500;font-size:14px}
+  .pi-lvl{font-size:12px;color:var(--steel)}
+  .reset{width:100%;background:none;border:1px solid #4a2420;color:#c66;border-radius:12px;padding:12px;font-size:13px;margin-top:8px}
+  nav{position:fixed;bottom:0;left:0;right:0;background:#10121659;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+  .tab{flex:1;background:none;border:none;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;font-weight:700;font-family:'Rubik'}
+  .tab svg{width:22px;height:22px}
+  .tab.active{color:var(--ember)}
+  .empty{color:var(--ash);font-size:14px;text-align:center;padding:18px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">סו<b>לם</b></div>
+  <div class="tag">משקל גוף · טיפוס · ספרינטים</div>
+</header>
+
+<section class="view active" id="v-today">
+  <div class="hero">
+    <div class="date" id="today-date"></div>
+    <div class="focus" id="today-focus"></div>
+    <div class="hint" id="today-hint"></div>
+    <div class="stats">
+      <div class="stat"><div class="big num" id="s-protein">0</div><div class="lbl">חלבון / יעד</div></div>
+      <div class="stat"><div class="big num" id="s-streak">0</div><div class="lbl">רצף אימונים</div></div>
+      <div class="stat"><div class="big num" id="s-weight">—</div><div class="lbl">משקל ק"ג</div></div>
+    </div>
+  </div>
+  <h2 class="section">צ'קליסט יומי</h2>
+  <div class="card" id="checklist"></div>
+</section>
+
+<section class="view" id="v-workout">
+  <h2 class="section">אימון גוף מלא</h2>
+  <p class="hint" style="margin:0 4px 8px">הזן חזרות בכל סט וסמן "בוצע". הגעת לקצה העליון בכל הסטים → הסולם נדלק ואפשר לעלות דרגה.</p>
+  <div id="ex-list"></div>
+</section>
+
+<section class="view" id="v-fuel">
+  <h2 class="section">דלק יומי</h2>
+  <div class="card">
+    <div class="gauges">
+      <div class="gauge">
+        <div class="glabel"><span>חלבון</span><span><b class="num" id="g-pro">0</b><span class="num tmuted">/<span id="t-pro">130</span> ג'</span></span></div>
+        <div class="bar"><div class="fill" id="f-pro" style="background:var(--steel)"></div></div>
+      </div>
+      <div class="gauge">
+        <div class="glabel"><span>קלוריות</span><span><b class="num" id="g-cal">0</b><span class="num tmuted">/<span id="t-cal">2500</span></span></span></div>
+        <div class="bar"><div class="fill" id="f-cal" style="background:var(--ember)"></div></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:13px">
+      <p class="hint" style="margin:0">יעד 120–145 ג' חלבון, סביב אחזקה. 80/20.</p>
+      <button class="btn sm" id="edit-targets" style="flex:0 0 auto;padding:8px 12px">ערוך יעד</button>
+    </div>
+  </div>
+
+  <div class="row" style="margin:18px 4px 10px">
+    <h2 class="section" style="margin:0">הוסף מנה</h2>
+    <button class="btn sm" id="toggle-custom" style="flex:0 0 auto;padding:8px 13px;color:var(--ember);border-color:#3a2620">+ ידני</button>
+  </div>
+  <div class="card" id="custom-form" style="display:none">
+    <input class="cin" id="c-name" placeholder="שם המנה">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input class="cin" id="c-pro" inputmode="numeric" placeholder="חלבון (ג')">
+      <input class="cin" id="c-cal" inputmode="numeric" placeholder="קלוריות (לא חובה)">
+    </div>
+    <div class="exbtns" style="margin-top:9px">
+      <button class="btn" id="c-savelib" style="flex:0 0 auto;padding:10px 13px">שמור לספרייה</button>
+      <button class="btn go" id="c-add">הוסף להיום</button>
+    </div>
+  </div>
+
+  <div class="lib" id="food-lib"></div>
+  <h2 class="section">נאכל היום</h2>
+  <div class="card" id="eaten"></div>
+</section>
+
+<section class="view" id="v-progress">
+  <h2 class="section">משקל גוף</h2>
+  <div class="card">
+    <div class="row"><span class="hint" style="margin:0">משקל אחרון</span><b class="num" id="cur-w" style="font-size:22px">—</b></div>
+    <div class="wlog">
+      <input id="w-input" type="number" inputmode="decimal" placeholder="74.0" step="0.1">
+      <button class="btn go" style="flex:0 0 90px" id="w-save">שמור</button>
+    </div>
+    <svg class="chart" id="w-chart"></svg>
+  </div>
+  <h2 class="section">דרגות נוכחיות</h2>
+  <div class="card" id="prog-list"></div>
+  <button class="reset" id="reset-btn">אפס את כל הנתונים</button>
+</section>
+
+<nav>
+  <button class="tab active" data-v="today"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>היום</button>
+  <button class="tab" data-v="workout"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5L17.5 17.5M21 21l-1-1M3 3l1 1m3 3l3 3m4 4l3 3M6.5 17.5L17.5 6.5"/></svg>אימון</button>
+  <button class="tab" data-v="fuel"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a7 7 0 00-7 7c0 3 2 5 2 8a5 5 0 0010 0c0-3 2-5 2-8a7 7 0 00-7-7z"/></svg>תזונה</button>
+  <button class="tab" data-v="progress"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M21 7v5"/></svg>התקדמות</button>
+</nav>
+
+<script>
+const EXERCISES = [
+  {id:'squat', name:'סקוואט', unit:'reps', lo:12, hi:20, sets:3,
+    levels:['בעזרת תמיכה','משקל גוף','טמפו (3 שנ\' ירידה)','קפיצה','Skater / Archer']},
+  {id:'pushup', name:'שכיבות סמיכה', unit:'reps', lo:8, hi:15, sets:3,
+    levels:['ידיים על קיר/שולחן','על הברכיים','שכיבה מלאה','רגליים מוגבהות','Diamond']},
+  {id:'ringrow', name:'Ring Rows', unit:'reps', lo:6, hi:12, sets:3,
+    levels:['גוף זקוף','נטוי ~45°','אופקי','רגליים מוגבהות','Archer'],
+    note:'משיכה — אל תקבע ביום צמוד לטיפוס (אמות/מרפק).'},
+  {id:'dips', name:'מקבילים (Dips)', unit:'reps', lo:6, hi:12, sets:3,
+    levels:['תמיכה על ספסל','Negatives (ירידה איטית)','מלאים','על הטבעות'],
+    note:'⚠ כתף שמאל: עצור על צביטה/כאב חד בבריח. אי-נוחות שרירית רגילה — בסדר.'},
+  {id:'bss', name:'Bulgarian Split Squat', unit:'reps', lo:10, hi:14, sets:3,
+    levels:['נתמך','מלא','טמפו איטי','קפיצה'], note:'לכל רגל.'},
+  {id:'hollow', name:'Hollow Hold', unit:'sec', lo:20, hi:40, sets:3,
+    levels:['ברכיים מקופלות (Tuck)','רגל אחת','Hollow מלא','עם ידיים מעל הראש']},
+  {id:'legraise', name:'הרמות רגליים בתליה', unit:'reps', lo:8, hi:12, sets:3,
+    levels:['הרמות ברכיים','ברך לחזה מלא','רגליים ישרות','Toes-to-bar']},
+  {id:'superman', name:'Superman Hold (גב תחתון)', unit:'sec', lo:20, hi:30, sets:3,
+    levels:['בסיסי','החזקה בקצה','+ פתיחת ידיים']},
+];
+
+const FOODS = [
+  {n:'ביצה',p:6,c:78,$:'₪'},{n:'חזה עוף 150ג',p:46,c:250,$:'₪'},
+  {n:'טונה (קופסה)',p:25,c:110,$:'₪'},{n:'קוטג\' 250ג',p:28,c:220,$:'₪'},
+  {n:'יוגורט יווני',p:17,c:120,$:'₪'},{n:'סקופ אבקת חלבון',p:24,c:120,$:'₪₪'},
+  {n:'עדשים (כוס)',p:18,c:230,$:'₪'},{n:'טופו 150ג',p:18,c:170,$:'₪₪'},
+  {n:'שיבולת שועל 80ג',p:11,c:300,$:'₪'},{n:'אורז (כוס)',p:4,c:205,$:'₪'},
+  {n:'בקר טחון 150ג',p:30,c:250,$:'₪₪'},{n:'סלמון 150ג',p:34,c:280,$:'₪₪₪'},
+  {n:'חומוס (מנה)',p:8,c:180,$:'₪'},{n:'שייק חלבון',p:30,c:300,$:'₪₪'},
+  {n:'בננה',p:1,c:105,$:'₪'},{n:'המבורגר בחוץ',p:28,c:650,$:'₪₪₪'},
+];
+
+const DEF_PRO=130, DEF_CAL=2500;
+const TIPS=[
+  ['היום אימון','עבור על התרגילים, סמן את הסטים. <span>איכות לפני כמות.</span>'],
+  ['יום טיפוס','זה יום המשיכה והאחיזה שלך. <span>אל תוסיף מתחים.</span>'],
+  ['ספרינטים','חמם היטב — מיתר אחורי. <span>התחל בעלייה.</span>'],
+  ['מנוחה','שריר נבנה במנוחה. <span>תן לגוף לעבוד.</span>'],
+];
+
+let S = null;
+const todayStr = ()=> new Date().toISOString().slice(0,10);
+
+function blankState(){
+  const ex={};
+  EXERCISES.forEach(e=> ex[e.id]={level:0, reps:Array(e.sets).fill(''), done:false, ready:false, last:null});
+  return {ex, weight:[], day:{date:todayStr(), pro:0, cal:0, eaten:[], check:{}}, streak:0, lastWorkout:null, proTarget:DEF_PRO, calTarget:DEF_CAL, myFoods:[]};
+}
+
+const Store={
+  async load(){
+    try{
+      if(typeof window!=='undefined' && window.storage){
+        const r=await window.storage.get('sulamState'); return r&&r.value?JSON.parse(r.value):null;
+      }
+      const ls=localStorage.getItem('sulamState'); return ls?JSON.parse(ls):null;
+    }catch(e){return null;}
+  },
+  async save(){
+    try{
+      if(typeof window!=='undefined' && window.storage){ await window.storage.set('sulamState', JSON.stringify(S)); return; }
+      localStorage.setItem('sulamState', JSON.stringify(S));
+    }catch(e){}
+  }
+};
+let saveT; const save=()=>{clearTimeout(saveT);saveT=setTimeout(()=>Store.save(),300);};
+
+function rolloverDay(){
+  if(S.day.date!==todayStr()){
+    S.day={date:todayStr(), pro:0, cal:0, eaten:[], check:{}};
+    EXERCISES.forEach(e=>{S.ex[e.id].done=false; S.ex[e.id].reps=Array(e.sets).fill('');});
+  }
+}
+
+function fmt(d){ return new Intl.DateTimeFormat('he-IL',{weekday:'long',day:'numeric',month:'long'}).format(d); }
+
+function renderToday(){
+  document.getElementById('today-date').textContent=fmt(new Date());
+  const dow=new Date().getDay();
+  const map={0:0,2:1,5:2,4:3};
+  const t=TIPS[map[dow]!==undefined?map[dow]:0];
+  document.getElementById('today-focus').innerHTML=t[0];
+  document.getElementById('today-hint').innerHTML=t[1];
+  document.getElementById('s-protein').innerHTML=S.day.pro+'<span style="font-size:13px;color:var(--ash)">/'+S.proTarget+'</span>';
+  document.getElementById('s-protein').className='big num'+(S.day.pro>=S.proTarget?' on':'');
+  document.getElementById('s-streak').textContent=S.streak;
+  const lw=S.weight[S.weight.length-1];
+  document.getElementById('s-weight').textContent=lw?lw.kg:'—';
+  const items=[['workout','השלמתי אימון'],['protein','הגעתי ליעד חלבון'],['steps','8,000+ צעדים'],['water','שתיתי מספיק מים'],['sleep','7+ שעות שינה']];
+  const cl=document.getElementById('checklist');
+  cl.innerHTML=items.map(([k,label])=>{
+    const auto = k==='protein' && S.day.pro>=S.proTarget;
+    const on = S.day.check[k]||auto;
+    return '<div class="check '+(on?'done':'')+'" data-k="'+k+'">'
+      +'<div class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#1a0f0a" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>'
+      +'<div class="ctext">'+label+'</div></div>';
+  }).join('');
+  cl.querySelectorAll('.check').forEach(el=>el.onclick=()=>{
+    const k=el.dataset.k; S.day.check[k]=!S.day.check[k];
+    if(k==='workout' && S.day.check[k]){ if(S.lastWorkout!==todayStr()){ S.streak++; S.lastWorkout=todayStr(); } }
+    save(); renderToday();
+  });
+}
+
+function ladderHTML(e,st){
+  let h='<div class="ladder">';
+  for(let i=0;i<e.levels.length;i++){
+    let cls='rung'; if(i<st.level)cls+=' done'; if(i===st.level){cls+=' cur'+(st.ready?' ready':'');}
+    h+='<div class="'+cls+'"></div>';
+  }
+  return h+'</div>';
+}
+
+function renderWorkout(){
+  const list=document.getElementById('ex-list');
+  list.innerHTML=EXERCISES.map(e=>{
+    const st=S.ex[e.id];
+    const unit=e.unit==='sec'?'שנ\'':'חז\'';
+    const setInputs=st.reps.map((v,i)=>'<input class="setin" inputmode="numeric" data-ex="'+e.id+'" data-i="'+i+'" value="'+v+'" placeholder="'+e.lo+'">').join('');
+    const lastTxt = st.last ? ('פעם שעברה: '+(st.last.filter(x=>x!=='').join(' · ')||'—')) : '';
+    let action;
+    if(st.done && st.ready){
+      action='<button class="btn advance" data-adv="'+e.id+'">⬆ עלה דרגה</button><button class="btn sm" data-undo="'+e.id+'">בטל</button>';
+    } else if(st.done){
+      action='<div class="done-tag">✓ בוצע</div><button class="btn sm" data-undo="'+e.id+'">בטל</button>';
+    } else {
+      action='<button class="btn ghost" data-down="'+e.id+'" aria-label="הורד דרגה">▾</button><button class="btn go" data-log="'+e.id+'">סמן בוצע</button>';
+    }
+    return '<div class="card exc">'
+      +'<div class="ex-head"><span class="ex-name">'+e.name+'</span><span class="ex-badge">דרגה '+(st.level+1)+'/'+e.levels.length+'</span></div>'
+      +'<div class="ex-meta">'+e.levels[st.level]+' <b>· '+e.sets+'×'+e.lo+'–'+e.hi+' '+unit+'</b></div>'
+      +(lastTxt?'<div class="ex-last">'+lastTxt+'</div>':'')
+      +(e.note?'<div class="ex-note">'+e.note+'</div>':'')
+      +ladderHTML(e,st)
+      +'<div class="sets">'+setInputs+'</div>'
+      +'<div class="exbtns">'+action+'</div></div>';
+  }).join('');
+
+  list.querySelectorAll('.setin').forEach(inp=>inp.oninput=()=>{
+    S.ex[inp.dataset.ex].reps[+inp.dataset.i]=inp.value; save();
+  });
+  list.querySelectorAll('[data-log]').forEach(b=>b.onclick=()=>{
+    const e=EXERCISES.find(x=>x.id===b.dataset.log), st=S.ex[e.id];
+    st.done=true; st.last=st.reps.slice();
+    const allHit=st.reps.every(r=> r!=='' && (+r)>=e.hi);
+    st.ready = allHit && st.level < e.levels.length-1;
+    save(); renderWorkout();
+  });
+  list.querySelectorAll('[data-undo]').forEach(b=>b.onclick=()=>{
+    const st=S.ex[b.dataset.undo]; st.done=false; st.ready=false; save(); renderWorkout();
+  });
+  list.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>{
+    const st=S.ex[b.dataset.adv]; st.level++; st.ready=false; st.done=false; st.last=null;
+    st.reps=st.reps.map(()=>''); save(); renderWorkout(); renderProgress();
+  });
+  list.querySelectorAll('[data-down]').forEach(b=>b.onclick=()=>{
+    const st=S.ex[b.dataset.down]; if(st.level>0){st.level--; st.ready=false;} save(); renderWorkout(); renderProgress();
+  });
+}
+
+function addToToday(f){
+  S.day.pro+=(+f.p||0); S.day.cal+=(+f.c||0);
+  S.day.eaten.push({n:f.n,p:+f.p||0,c:+f.c||0});
+  save(); renderFuel(); renderToday();
+}
+function tile(f,t,i,rm){
+  return '<div class="food" data-add="'+t+':'+i+'">'
+    +(rm?'<button class="mfrm" data-mfrm="'+i+'">×</button>':'')
+    +(f.$?'<span class="cost">'+f.$+'</span>':'')
+    +'<div class="fn">'+f.n+'</div>'
+    +'<div class="fm"><span class="fp">'+f.p+'ג חלבון</span>'+(f.c?' · '+f.c+' קל\'':'')+'</div></div>';
+}
+function renderFuel(){
+  document.getElementById('g-pro').textContent=S.day.pro;
+  document.getElementById('g-cal').textContent=S.day.cal;
+  document.getElementById('t-pro').textContent=S.proTarget;
+  document.getElementById('t-cal').textContent=S.calTarget;
+  document.getElementById('f-pro').style.width=Math.min(100,S.day.pro/S.proTarget*100)+'%';
+  document.getElementById('f-cal').style.width=Math.min(100,S.day.cal/S.calTarget*100)+'%';
+  const libEl=document.getElementById('food-lib');
+  let html=FOODS.map((f,i)=>tile(f,'f',i,false)).join('');
+  html+=S.myFoods.map((f,i)=>tile(f,'mf',i,true)).join('');
+  libEl.innerHTML=html;
+  libEl.querySelectorAll('[data-add]').forEach(el=>el.onclick=()=>{
+    const parts=el.dataset.add.split(':'); const f=parts[0]==='f'?FOODS[+parts[1]]:S.myFoods[+parts[1]]; if(f)addToToday(f);
+  });
+  libEl.querySelectorAll('[data-mfrm]').forEach(b=>b.onclick=(ev)=>{
+    ev.stopPropagation(); S.myFoods.splice(+b.dataset.mfrm,1); save(); renderFuel();
+  });
+  const eaten=document.getElementById('eaten');
+  if(!S.day.eaten.length){eaten.innerHTML='<div class="empty">עוד לא הוספת כלום היום.<br>הקש על מנה כדי לעקוב.</div>';return;}
+  eaten.innerHTML=S.day.eaten.map((f,i)=>'<div class="added"><span>'+f.n+'</span>'
+    +'<span style="display:flex;align-items:center;gap:10px"><span class="num">'+f.p+'ג · '+f.c+'קל\'</span>'
+    +'<button class="rm" data-rm="'+i+'">×</button></span></div>').join('');
+  eaten.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{
+    const f=S.day.eaten.splice(+b.dataset.rm,1)[0]; S.day.pro-=f.p; S.day.cal-=f.c; save(); renderFuel(); renderToday();
+  });
+}
+function commitCustom(toLib){
+  const name=document.getElementById('c-name').value.trim();
+  const pro=parseFloat(document.getElementById('c-pro').value);
+  const cal=parseFloat(document.getElementById('c-cal').value);
+  if(!name||isNaN(pro)){ alert('שם וחלבון הם שדות חובה'); return; }
+  const f={n:name,p:Math.round(pro),c:isNaN(cal)?0:Math.round(cal),$:''};
+  if(toLib) S.myFoods.push({n:f.n,p:f.p,c:f.c,$:''});
+  addToToday(f);
+  document.getElementById('c-name').value=''; document.getElementById('c-pro').value=''; document.getElementById('c-cal').value='';
+  document.getElementById('custom-form').style.display='none';
+}
+function setupFuel(){
+  document.getElementById('toggle-custom').onclick=()=>{
+    const f=document.getElementById('custom-form'); f.style.display=(f.style.display==='none'?'block':'none');
+  };
+  document.getElementById('c-add').onclick=()=>commitCustom(false);
+  document.getElementById('c-savelib').onclick=()=>commitCustom(true);
+  document.getElementById('edit-targets').onclick=()=>{
+    const p=prompt('יעד חלבון (גרם):',S.proTarget); if(p!==null && +p>0) S.proTarget=Math.round(+p);
+    const c=prompt('יעד קלוריות:',S.calTarget); if(c!==null && +c>0) S.calTarget=Math.round(+c);
+    save(); renderFuel(); renderToday();
+  };
+}
+
+function renderProgress(){
+  const lw=S.weight[S.weight.length-1];
+  document.getElementById('cur-w').textContent=lw?lw.kg+' ק"ג':'—';
+  drawChart();
+  document.getElementById('prog-list').innerHTML=EXERCISES.map(e=>{
+    const st=S.ex[e.id];
+    return '<div class="prog-item">'+ladderHTML(e,st)
+      +'<span class="pi-name">'+e.name+'</span>'
+      +'<span class="pi-lvl">'+e.levels[st.level]+'</span></div>';
+  }).join('');
+}
+function drawChart(){
+  const svg=document.getElementById('w-chart'); const W=svg.clientWidth||320, H=140, pad=20;
+  const d=S.weight;
+  if(d.length<2){svg.innerHTML='<text x="'+(W/2)+'" y="'+(H/2)+'" fill="#969cab" font-size="13" text-anchor="middle" font-family="Heebo">תיעוד 2+ שקילות יראה כאן גרף מגמה</text>';return;}
+  const ys=d.map(x=>x.kg), min=Math.min(...ys)-0.5, max=Math.max(...ys)+0.5;
+  const X=i=> pad + i*(W-2*pad)/(d.length-1);
+  const Y=v=> pad + (1-(v-min)/(max-min))*(H-2*pad);
+  let path=d.map((x,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(x.kg).toFixed(1)).join(' ');
+  let dots=d.map((x,i)=>'<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(x.kg).toFixed(1)+'" r="3.5" fill="#FF5A36"/>').join('');
+  svg.innerHTML='<path d="'+path+'" fill="none" stroke="#FF5A36" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+dots
+    +'<text x="'+X(d.length-1)+'" y="'+(Y(d[d.length-1].kg)-10)+'" fill="#ECE7DA" font-size="13" font-family="JetBrains Mono" text-anchor="middle">'+d[d.length-1].kg+'</text>';
+}
+
+function show(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('v-'+v).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
+  if(v==='today')renderToday(); if(v==='workout')renderWorkout();
+  if(v==='fuel')renderFuel(); if(v==='progress')renderProgress();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>show(t.dataset.v));
+
+document.getElementById('w-save').onclick=()=>{
+  const inp=document.getElementById('w-input'); const v=parseFloat(inp.value);
+  if(!v||v<30||v>250)return;
+  S.weight.push({date:todayStr(),kg:v}); inp.value=''; save(); renderProgress(); renderToday();
+};
+document.getElementById('reset-btn').onclick=()=>{
+  if(confirm('לאפס את כל הנתונים — תיעוד, דרגות, משקל, מנות אישיות? אין חזרה.')){
+    S=blankState(); save(); renderFuel(); show('today');
+  }
+};
+
+(async function init(){
+  const loaded=await Store.load();
+  S = loaded || blankState();
+  if(!S.ex) S=blankState();
+  EXERCISES.forEach(e=>{
+    if(!S.ex[e.id]) S.ex[e.id]={level:0,reps:Array(e.sets).fill(''),done:false,ready:false,last:null};
+    else if(S.ex[e.id].last===undefined) S.ex[e.id].last=null;
+  });
+  if(!S.day) S.day={date:todayStr(),pro:0,cal:0,eaten:[],check:{}};
+  if(!S.weight) S.weight=[];
+  if(S.proTarget===undefined) S.proTarget=DEF_PRO;
+  if(S.calTarget===undefined) S.calTarget=DEF_CAL;
+  if(!S.myFoods) S.myFoods=[];
+  rolloverDay(); save();
+  setupFuel();
+  show('today');
+})();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
