@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>סולם</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#14161b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="סולם">
+<link rel="apple-touch-icon" href="./icon192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Heebo:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14161b; --ink2:#1b1e25; --card:#1f232b; --line:#2c313b;
+    --chalk:#ECE7DA; --ash:#969cab; --dim:#5b616e;
+    --ember:#FF5A36; --ember-soft:#ff5a3622; --steel:#5FB8C4; --ready:#9bd16a;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--ink);color:var(--chalk);font-family:'Heebo',sans-serif}
+  body{padding-bottom:78px;min-height:100vh}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  header{padding:22px 18px 10px;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line)}
+  .logo{font-family:'Rubik';font-weight:900;font-size:30px;letter-spacing:-1px}
+  .logo b{color:var(--ember)}
+  .tag{font-size:12px;color:var(--ash);letter-spacing:.3px}
+  .view{display:none;padding:16px 16px 24px;animation:fade .25s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2.section{font-family:'Rubik';font-weight:700;font-size:13px;letter-spacing:2px;color:var(--ash);text-transform:uppercase;margin:20px 4px 10px}
+  h2.section:first-child{margin-top:4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .hero{background:linear-gradient(150deg,#23272f,#1a1d24);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:14px}
+  .date{font-size:13px;color:var(--ash);font-weight:500}
+  .focus{font-family:'Rubik';font-weight:900;font-size:26px;line-height:1.15;margin-top:4px}
+  .focus span{color:var(--ember)}
+  .hint{font-size:13px;color:var(--ash);margin-top:8px;line-height:1.5}
+  .stats{display:flex;gap:12px;margin-top:16px}
+  .stat{flex:1;background:#181b21;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+  .stat .big{font-family:var(--mono);font-weight:700;font-size:22px}
+  .stat .lbl{font-size:11px;color:var(--ash);margin-top:2px}
+  .stat .big.on{color:var(--ember)}
+  .check{display:flex;align-items:center;gap:13px;padding:13px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+  .check:last-child{border-bottom:none}
+  .box{width:24px;height:24px;border-radius:8px;border:2px solid var(--dim);flex-shrink:0;display:grid;place-items:center;transition:.18s}
+  .check.done .box{background:var(--ember);border-color:var(--ember)}
+  .box svg{width:14px;height:14px;opacity:0;transition:.18s}
+  .check.done .box svg{opacity:1}
+  .check .ctext{font-size:15px;font-weight:500}
+  .check.done .ctext{color:var(--ash);text-decoration:line-through}
+  /* ---- Week ---- */
+  .wk-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .wk-navb{flex:0 0 40px;height:38px;background:#15181d;border:1px solid var(--line);color:var(--chalk);border-radius:11px;font-size:20px;font-family:'Rubik';display:grid;place-items:center}
+  .wk-navb:disabled{cursor:default}
+  .wk-rangelbl{flex:1;text-align:center;font-family:'Rubik';font-weight:700;font-size:14px;color:var(--chalk)}
+  .wk-toggle{display:flex;gap:8px;margin-bottom:14px}
+  .wk-toggle button{flex:1;background:#15181d;border:1px solid var(--line);color:var(--ash);border-radius:11px;padding:11px;font-size:13px;font-weight:700;font-family:'Rubik'}
+  .wk-toggle button.on{background:var(--ember);border-color:transparent;color:#1a0f0a}
+  .wk-today{background:linear-gradient(150deg,#23272f,#1a1d24);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}
+  .wk-today .lbl{font-size:12px;color:var(--ash);font-weight:500}
+  .wk-today .ses{font-family:'Rubik';font-weight:900;font-size:24px;line-height:1.15;margin-top:5px}
+  .wk-today .foc{font-size:13px;color:var(--ash);margin-top:8px;line-height:1.5}
+  .wk-doneflag{color:var(--ready);font-size:18px}
+  .wk-list{padding:6px 10px}
+  .wk-day{display:flex;align-items:center;gap:11px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+  .wk-day:last-child{border-bottom:none}
+  .wk-day.today{background:#181b21;border:1px solid var(--line);border-radius:12px;padding:12px 10px;margin:5px -6px}
+  .wk-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .wk-dn{font-family:'Rubik';font-weight:700;font-size:13px;width:42px;flex-shrink:0;color:var(--ash)}
+  .wk-day.today .wk-dn{color:var(--chalk)}
+  .wk-info{flex:1;min-width:0}
+  .wk-tt{font-size:14px;font-weight:500}
+  .wk-ff{font-size:11.5px;color:var(--ash);margin-top:2px}
+  .wk-ovr{font-family:var(--mono);font-size:9.5px;color:var(--steel);border:1px solid #29424a;border-radius:5px;padding:1px 5px;margin-right:4px}
+  .wk-now{font-family:var(--mono);font-size:10px;color:var(--ember);border:1px solid #3a2620;border-radius:6px;padding:2px 6px;flex-shrink:0}
+  .wk-check{color:var(--ready);font-size:18px;flex-shrink:0;font-weight:700}
+  /* week inline editor */
+  .wk-ed{background:#15181d;border:1px solid var(--line);border-radius:12px;padding:12px;margin:2px -6px 6px;animation:fade .18s ease}
+  .wk-ed-l{font-size:11px;color:var(--ash);font-family:'Rubik';font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+  .wk-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .wk-chip{background:#1f232b;border:1px solid var(--line);color:var(--ash);border-radius:9px;padding:7px 11px;font-size:12.5px;font-weight:700}
+  .wk-chip.on{background:var(--steel);border-color:transparent;color:#0c1416}
+  .wk-donebtn{width:100%;background:#1f232b;border:1px solid var(--line);color:var(--chalk);border-radius:9px;padding:9px;font-size:13px;font-weight:700}
+  .wk-donebtn.on{background:var(--ready);border-color:transparent;color:#16210a}
+  /* ---- Workout intro / explainer ---- */
+  .wk-help{background:none;border:1px solid var(--line);color:var(--ash);border-radius:11px;padding:11px 13px;width:100%;text-align:right;font-size:13px;font-weight:700;font-family:'Heebo';display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 12px}
+  .wk-help .chev{color:var(--dim);transition:transform .2s}
+  .wk-help.open{color:var(--chalk);border-color:var(--steel)}
+  .wk-help.open .chev{transform:rotate(180deg);color:var(--steel)}
+  .wk-panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:14px;font-size:13.5px;line-height:1.6;color:var(--chalk);animation:fade .2s ease}
+  .wk-panel p{margin-bottom:9px}
+  .wk-panel p:last-child{margin-bottom:0}
+  .wk-panel b{color:var(--steel)}
+  .wk-panel .n{color:var(--chalk);font-family:var(--mono);font-weight:500}
+  /* ---- Exercise card ---- */
+  .exc{padding:13px 14px;margin-bottom:10px}
+  .ex-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .ex-name{font-family:'Rubik';font-weight:700;font-size:16px}
+  .ex-head-r{display:flex;align-items:center;gap:7px;flex-shrink:0}
+  .ex-badge{font-family:var(--mono);font-size:11px;color:var(--ash);background:#15181d;border:1px solid var(--line);padding:3px 7px;border-radius:7px;white-space:nowrap}
+  .btn.info{flex:0 0 auto;width:25px;height:25px;padding:0;border-radius:50%;background:#15181d;border:1px solid var(--line);color:var(--ash);font-family:'Rubik';font-weight:900;font-size:14px;font-style:italic;display:grid;place-items:center;line-height:1}
+  .btn.info.open{background:var(--steel);border-color:transparent;color:#0c1416}
+  .ex-meta{font-size:12.5px;color:var(--steel);margin-top:4px;font-weight:500}
+  .ex-meta b{color:var(--ash);font-weight:400}
+  .ex-last{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:5px}
+  .ex-note{font-size:11.5px;color:#d9a06a;margin-top:6px;line-height:1.4}
+  .exinfo{margin-top:11px;padding:12px 13px;background:#15181d;border:1px solid var(--line);border-radius:11px;animation:fade .2s ease}
+  .exinfo .muscle{color:var(--steel);font-weight:700;font-size:13px;margin-bottom:9px}
+  .exinfo .muscle small{color:var(--ash);font-weight:400;font-size:13px}
+  .exinfo ol{margin:0;padding-right:17px;font-size:13px;line-height:1.6;color:var(--chalk)}
+  .exinfo ol li{margin-bottom:2px}
+  .exinfo .restline{margin-top:9px;font-size:12.5px;color:var(--ash)}
+  .exinfo .restline b{color:var(--chalk);font-family:var(--mono);font-weight:500}
+  .exinfo .ytlink{display:inline-block;margin-top:11px;font-size:12.5px;color:var(--ash);text-decoration:none;border-bottom:1px dotted var(--dim);padding-bottom:1px}
+  .exinfo .ytlink:active{color:var(--ember)}
+  .ladder{display:flex;gap:4px;margin-top:9px}
+  .rung{flex:1;height:6px;border-radius:3px;background:#23262e;border:1px solid var(--line)}
+  .rung.done{background:var(--steel);opacity:.5;border-color:transparent}
+  .rung.cur{background:var(--ember);border-color:transparent}
+  @media (prefers-reduced-motion: no-preference){.rung.cur.ready{animation:pulse 1.4s infinite}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--ember-soft)}50%{box-shadow:0 0 0 5px transparent}}
+  .sets{display:flex;gap:6px;margin-top:11px}
+  .setin{flex:1 1 0;width:0;min-width:0;height:40px;background:#15181d;border:1px solid var(--line);border-radius:9px;text-align:center;color:var(--chalk);font-family:var(--mono);font-weight:700;font-size:15px}
+  .setin::placeholder{color:#454b56}
+  .setin:focus{outline:2px solid var(--steel);outline-offset:-1px;border-color:transparent}
+  .exbtns{display:flex;gap:7px;margin-top:9px;align-items:stretch}
+  button{font-family:'Heebo';cursor:pointer;border:none;font-weight:700}
+  .btn{flex:1;background:#272b34;color:var(--chalk);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:14px;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn.go{background:var(--ember);border-color:transparent;color:#1a0f0a}
+  .btn.ghost{flex:0 0 44px;font-size:17px;color:var(--ash);padding:10px 0}
+  .btn.sm{flex:0 0 66px;background:none;color:var(--ash);font-size:13px;border-color:var(--line)}
+  .advance{background:var(--ready)!important;color:#16210a!important;border:none}
+  .done-tag{flex:1;font-size:13px;color:var(--ready);font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;background:#1b2417;border:1px solid #2c3a22;border-radius:10px}
+  /* ---- Sprint ---- */
+  .sprint-card{padding:14px}
+  .sp-ol{margin:0;padding-right:18px;font-size:13.5px;line-height:1.7}
+  .sp-ol li{margin-bottom:3px}
+  .sp-warn{margin-top:11px;font-size:12px;color:#d9a06a;line-height:1.5;border-top:1px solid var(--line);padding-top:10px}
+  .sp-fmt{position:relative}
+  .sp-tag{display:inline-block;font-family:var(--mono);font-size:10px;border-radius:6px;padding:2px 7px;margin-bottom:8px}
+  .sp-ft{font-family:'Rubik';font-weight:700;font-size:15px}
+  .sp-fb{font-size:13px;color:var(--steel);margin-top:5px;font-weight:500;line-height:1.5}
+  .sp-fn{font-size:12px;color:var(--ash);margin-top:6px;line-height:1.5}
+  .sp-core{margin:0;padding-right:18px;font-size:13.5px;line-height:1.8}
+  .sp-opt{color:var(--ash);font-size:11.5px}
+  .sp-p{font-size:13.5px;color:var(--chalk);line-height:1.6}
+  /* ---- Nutrition guide accordion ---- */
+  .acc-btn{background:none;border:1px solid var(--line);color:var(--ash);border-radius:11px;padding:12px 13px;width:100%;text-align:right;font-size:13.5px;font-weight:700;font-family:'Heebo';display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+  .acc-btn .chev{color:var(--dim);transition:transform .2s;font-size:12px}
+  .acc-btn.open{color:var(--chalk);border-color:var(--steel)}
+  .acc-btn.open .chev{transform:rotate(180deg);color:var(--steel)}
+  .acc-panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px;margin:-2px 0 12px;font-size:13.5px;line-height:1.65;animation:fade .2s ease}
+  .acc-panel h4{font-family:'Rubik';font-weight:700;font-size:13px;color:var(--steel);margin:13px 0 5px}
+  .acc-panel h4:first-child{margin-top:0}
+  .acc-panel p{margin-bottom:8px;color:var(--chalk)}
+  .acc-panel ul{margin:0 0 9px;padding-right:17px}
+  .acc-panel li{margin-bottom:4px;color:var(--chalk)}
+  .acc-panel li b{color:var(--chalk)}
+  .acc-panel .why{color:var(--ash)}
+  .acc-panel .good{color:var(--ready)}
+  .acc-panel .less{color:#d9a06a}
+  .acc-panel .num{color:var(--steel);font-family:var(--mono);font-weight:500}
+  .acc-panel .lead{color:var(--ash);font-size:12.5px;margin-bottom:11px}
+  /* ---- Fuel ---- */
+  .gauges{display:flex;gap:12px;margin-bottom:6px}
+  .gauge{flex:1}
+  .bar{height:12px;background:#15181d;border-radius:8px;overflow:hidden;margin-top:7px;border:1px solid var(--line)}
+  .fill{height:100%;border-radius:8px;transition:width .4s ease}
+  .glabel{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+  .glabel b{font-family:var(--mono);font-size:17px}
+  .tmuted{color:var(--ash)}
+  .cin{width:100%;background:#15181d;border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--chalk);font-size:14px;font-family:'Heebo'}
+  .cin::placeholder{color:#5b616e}
+  .cin:focus{outline:2px solid var(--steel);outline-offset:-1px;border-color:transparent}
+  .lib{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .food{position:relative;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px;text-align:right;cursor:pointer;transition:.15s}
+  .food:active{transform:scale(.97);border-color:var(--ember)}
+  .food .fn{font-size:14px;font-weight:700}
+  .food .fm{font-family:var(--mono);font-size:12px;color:var(--ash);margin-top:4px}
+  .food .fp{color:var(--steel)}
+  .cost{font-size:11px;color:var(--dim);float:left}
+  .mfrm{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:6px;background:#000a;color:#d77;border:none;font-size:15px;line-height:1;cursor:pointer;z-index:2}
+  .added{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--line);font-size:14px}
+  .added:last-child{border-bottom:none}
+  .added .num{color:var(--ash);font-size:12px}
+  .rm{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:0 6px}
+  /* ---- Progress ---- */
+  .wlog{display:flex;gap:8px;margin-top:10px}
+  .wlog input{flex:1;background:#15181d;border:1px solid var(--line);border-radius:11px;padding:11px;color:var(--chalk);font-family:var(--mono);font-size:16px;text-align:center}
+  svg.chart{width:100%;height:140px;margin-top:14px;overflow:visible}
+  .prog-item{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
+  .prog-item:last-child{border-bottom:none}
+  .prog-item .ladder{flex:0 0 52px;width:52px;margin-top:0}
+  .pi-name{flex:1;font-weight:500;font-size:14px}
+  .pi-lvl{font-size:12px;color:var(--steel)}
+  .backup{display:flex;gap:8px;margin-top:8px}
+  .backup .btn{font-size:13px}
+  .reset{width:100%;background:none;border:1px solid #4a2420;color:#c66;border-radius:12px;padding:12px;font-size:13px;margin-top:8px}
+  .data-note{font-size:11.5px;color:var(--dim);line-height:1.5;margin:10px 4px 0;text-align:center}
+  nav{position:fixed;bottom:0;left:0;right:0;background:#10121659;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
+  .tab{flex:1;background:none;border:none;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;font-weight:700;font-family:'Rubik'}
+  .tab svg{width:22px;height:22px}
+  .tab.active{color:var(--ember)}
+  .empty{color:var(--ash);font-size:14px;text-align:center;padding:18px;line-height:1.6}
+  /* ---- Confetti ---- */
+  .confetti-box{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
+  .confetti-box i{position:absolute;top:-24px;border-radius:2px;animation:confall 2.2s linear forwards}
+  @keyframes confall{to{transform:translateY(112vh) rotate(720deg);opacity:.15}}
+  @media (prefers-reduced-motion: reduce){.confetti-box{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">סו<b>לם</b></div>
+  <div class="tag">משקל גוף · טיפוס · ספרינטים</div>
+</header>
+
+<section class="view active" id="v-today">
+  <div class="hero">
+    <div class="date" id="today-date"></div>
+    <div class="focus" id="today-focus"></div>
+    <div class="hint" id="today-hint"></div>
+    <div class="stats">
+      <div class="stat"><div class="big num" id="s-protein">0</div><div class="lbl">חלבון / יעד</div></div>
+      <div class="stat"><div class="big num" id="s-streak">0</div><div class="lbl">רצף אימונים</div></div>
+      <div class="stat"><div class="big num" id="s-weight">—</div><div class="lbl">משקל ק"ג</div></div>
+    </div>
+  </div>
+  <h2 class="section">צ'קליסט יומי</h2>
+  <div class="card" id="checklist"></div>
+</section>
+
+<section class="view" id="v-week">
+  <h2 class="section">השבוע</h2>
+  <div class="wk-nav">
+    <button class="wk-navb" id="wk-prev" aria-label="שבוע קודם">‹</button>
+    <div class="wk-rangelbl" id="wk-range">השבוע</div>
+    <button class="wk-navb" id="wk-next" aria-label="שבוע הבא">›</button>
+  </div>
+  <div class="wk-toggle">
+    <button id="wk-base" class="on">שבוע בסיס</button>
+    <button id="wk-climb">שבוע טיפוס</button>
+  </div>
+  <div class="wk-today" id="wk-today-card"></div>
+  <h2 class="section">הלו"ז</h2>
+  <div class="card wk-list" id="wk-list"></div>
+  <p class="hint" style="margin:8px 4px 0">הקש על יום כדי לסמן <b style="color:var(--ready)">בוצע</b> או להחליף סוג אימון. שינויים נשמרים לאותו יום בלבד וחוזרים לתבנית בשבוע הבא. החיצים למעלה גוללים להיסטוריה.</p>
+</section>
+
+<section class="view" id="v-workout">
+  <div class="wk-toggle" style="margin-top:4px">
+    <button id="wo-s" class="on">כוח</button>
+    <button id="wo-sp">ספרינטים</button>
+  </div>
+
+  <div id="wo-strength">
+    <h2 class="section">אימון גוף מלא</h2>
+    <button class="wk-help" id="wk-help"><span>איך הסולם עובד · זמני מנוחה</span><span class="chev">▾</span></button>
+    <div class="wk-panel" id="wk-panel" style="display:none">
+      <p><b>הסולם:</b> תרגילי הליבה <span class="n">קבועים</span> לכל אורך הדרך — הם לא מתחלפים. מה שמשתנה זו <b>דרגת הקושי</b> של אותו תרגיל. כשאתה מגיע לקצה העליון של טווח החזרות בכל הסטים, הסולם נדלק ואתה עולה לגרסה קשה יותר של אותה תנועה (למשל שכיבות סמיכה: קיר → ברכיים → מלא → רגליים מוגבהות → Diamond).</p>
+      <p><b>מנוחה בין סטים:</b> <span class="n">60–90 שנ'</span>. בגרסאות הכוח הקשות (מתח, מקבילים) אפשר עד <span class="n">2 דק'</span>. תרגילי ליבה/בטן — <span class="n">45–60 שנ'</span>.</p>
+      <p><b>מנוחה בין תרגילים:</b> <span class="n">1–2 דק'</span> (או פשוט זמן המעבר וההתארגנות).</p>
+      <p><b>קצב:</b> ירידה מבוקרת בכל חזרה, בלי תנופה. איכות לפני כמות — עדיף 8 חזרות נקיות מ-15 רשלניות.</p>
+    </div>
+    <p class="hint" style="margin:0 4px 8px">הקש על <b style="font-style:italic;color:var(--chalk)">i</b> בכל תרגיל לצורת ביצוע, שרירים וסרטון. הזן חזרות בכל סט וסמן "בוצע".</p>
+    <div id="ex-list"></div>
+  </div>
+
+  <div id="wo-sprint" style="display:none">
+    <h2 class="section">יום ספרינטים</h2>
+    <p class="hint" style="margin:0 4px 12px">יום הקרדיו הקשה היחיד בשבוע. קצר, מתפרץ — שורף שומן ובונה כוח רגליים. משלים מצוין לכוח ולטיפוס.</p>
+
+    <h2 class="section">חימום · ~8–10 דק'</h2>
+    <div class="card sprint-card">
+      <ol class="sp-ol">
+        <li>5 דק' ריצה קלה / הליכה מהירה</li>
+        <li>דינמי: נדנודי רגליים ×10 לכל כיוון, לאנג'ים בהליכה, סיבובי קרסול</li>
+        <li>תרגילוני ריצה: ברכיים גבוהות, בעיטות עכוז, A-skips — ~20 מ' כל אחד</li>
+        <li>3 ריצות בנייה: 60% → 75% → 90% על ~40 מ', הליכה חזרה בין כל אחת</li>
+      </ol>
+      <p class="sp-warn">⚠ אל תדלג על החימום — סטרט קר זו הדרך הבטוחה לפציעת מיתר אחורי. רק אחרי ריצות הבנייה — מאמץ מלא.</p>
+    </div>
+
+    <h2 class="section">הסט המרכזי · בחר פורמט</h2>
+    <div class="card sprint-card sp-fmt">
+      <span class="sp-tag" style="background:#1b2417;color:#9bd16a">מומלץ להתחיל</span>
+      <div class="sp-ft">גבעה / עלייה</div>
+      <div class="sp-fb">6–8 × 15–20 שנ' בעלייה ב-~90% · הליכה למטה כמנוחה (60–90 שנ')</div>
+      <div class="sp-fn">העלייה מקצרת את הצעד ומורידה דרמטית את הסיכון למיתר האחורי.</div>
+    </div>
+    <div class="card sprint-card sp-fmt">
+      <div class="sp-ft">מישור</div>
+      <div class="sp-fb">8–10 × 30–40 מ' ב-~90–95% · הליכה חזרה כמנוחה (~90 שנ')</div>
+      <div class="sp-fn">יחס עבודה-מנוחה נדיב (~1:8) — כדי שכל ריצה תהיה איכותית ומהירה.</div>
+    </div>
+    <div class="card sprint-card sp-fmt">
+      <div class="sp-ft">אינטרוולים · וריאנט שורף</div>
+      <div class="sp-fb">6 × 30 שנ' חזק / 90 שנ' קל</div>
+      <div class="sp-fn">יותר נשימה ודופק, פחות מהירות שיא. טוב לימים שבא לך קרדיו.</div>
+    </div>
+    <div class="wk-panel" style="border-color:#3a2620">
+      <p><b style="color:var(--ember)">הכלל היחיד שחשוב:</b> ברגע שהמהירות יורדת בצורה מורגשת — <b style="color:var(--chalk)">עוצרים.</b> זה הקאפ האמיתי, לא המספר על הנייר. איכות לפני כמות, בדיוק כמו בכוח.</p>
+    </div>
+
+    <h2 class="section">ליבה לסיום · ~8 דק'</h2>
+    <div class="card sprint-card">
+      <ul class="sp-core">
+        <li>Hollow Hold — 3 × 20–40 שנ'</li>
+        <li>הרמות ברכיים/רגליים בתליה — 3 × 8–12</li>
+        <li>פלאנק צד — 2 × 20–30 שנ' לכל צד <span class="sp-opt">(אופציונלי · אנטי-רוטציה)</span></li>
+      </ul>
+    </div>
+
+    <h2 class="section">שחרור · ~5 דק'</h2>
+    <div class="card sprint-card">
+      <p class="sp-p">הליכה עד שהנשימה נרגעת, ואז מתיחות קלות: מיתר אחורי, מקרבים, שוקיים.</p>
+    </div>
+
+    <div class="wk-panel" style="margin-top:6px">
+      <p><b>ריצה ארוכה?</b> רק <b>קלה</b> (זון 2 — קצב שאפשר לדבר בו) ואופציונלית, ביום שני או שבת. ריצה קלה לא מתנגשת עם בניית שריר ואף עוזרת להתאוששות; <span class="n">רק ריצה קשה</span> מתנגשת. הכלל: לא שני ימי קרדיו קשים באותו שבוע.</p>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-fuel">
+  <h2 class="section">דלק יומי</h2>
+  <div class="card">
+    <div class="gauges">
+      <div class="gauge">
+        <div class="glabel"><span>חלבון</span><span><b class="num" id="g-pro">0</b><span class="num tmuted">/<span id="t-pro">130</span> ג'</span></span></div>
+        <div class="bar"><div class="fill" id="f-pro" style="background:var(--steel)"></div></div>
+      </div>
+      <div class="gauge">
+        <div class="glabel"><span>קלוריות</span><span><b class="num" id="g-cal">0</b><span class="num tmuted">/<span id="t-cal">2500</span></span></span></div>
+        <div class="bar"><div class="fill" id="f-cal" style="background:var(--ember)"></div></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:13px">
+      <p class="hint" style="margin:0">יעד 120–145 ג' חלבון, גירעון קל לחיטוב. 80/20.</p>
+      <button class="btn sm" id="edit-targets" style="flex:0 0 auto;padding:8px 12px">ערוך יעד</button>
+    </div>
+  </div>
+
+  <h2 class="section">מדריך · אוכל בריא</h2>
+  <button class="acc-btn" data-acc="acc-princ"><span>עקרונות · מה שחשוב לדעת</span><span class="chev">▾</span></button>
+  <div class="acc-panel" id="acc-princ" style="display:none">
+    <p class="lead">לבנות שריר ולהיחטב בו-זמנית אפשרי כשחוזרים לאימונים. שלושת הלברים:</p>
+    <h4>1 · חלבון גבוה</h4>
+    <p>הדבר הכי חשוב. סביב <span class="num">1.6–2 ג'</span> לכל ק"ג משקל גוף (היעד 130 ג' מכוון לשם). חלק ל-3–4 ארוחות, כ-<span class="num">30 ג'</span> בכל אחת — לא הכול במכה אחת.</p>
+    <h4>2 · קלוריות בגירעון קל</h4>
+    <p>לחיטוב — לא גירעון דרסטי (הורס שריר) ולא עודף. אומדן גס: <span class="num">משקל × 31</span> ≈ אחזקה; פחות ~<span class="num">400</span> ק"ל = יום ירידה. עקוב אחרי מגמת המשקל — אם לא יורד לאט תוך 2–3 שבועות, הורד עוד טיפה.</p>
+    <h4>3 · רוב הזמן מזון מלא (80/20)</h4>
+    <p>שום דבר לא אסור — זה עניין של פרופורציות. כל ארוחה: <b>חלבון + פחמימה מלאה + ירקות + טיפת שומן בריא.</b></p>
+    <h4>על שומן בטן</h4>
+    <p class="why">אי אפשר "לכוון" ירידת שומן לאזור מסוים. הבטן יורדת כשאחוז השומן הכללי יורד — דרך גירעון קל, חלבון, <b>שינה</b> (7+ שעות) ו<b>צעדים</b> (8,000+). הכי קל לפספס: קלוריות נוזליות (בירה, מיצים, משקאות מתוקים) — זה הראשון לגזום.</p>
+  </div>
+
+  <button class="acc-btn" data-acc="acc-day"><span>יום לדוגמה · ~130 ג' חלבון</span><span class="chev">▾</span></button>
+  <div class="acc-panel" id="acc-day" style="display:none">
+    <p class="lead">תבנית קבועה, תוכן מתחלף. ~1900–2100 ק"ל — הוסף/הורד פחמימה לפי המשקל.</p>
+    <ul>
+      <li><b>בוקר:</b> 3 ביצים + פרוסת לחם מלא + עגבנייה ומלפפון <span class="num">~25 ג'</span></li>
+      <li><b>נשנוש:</b> יוגורט יווני + פרי/חופן פירות יער <span class="num">~18 ג'</span></li>
+      <li><b>צהריים:</b> 150 ג' חזה עוף + חצי כוס אורז + סלט גדול עם שמן זית <span class="num">~48 ג'</span></li>
+      <li><b>סביב אימון:</b> 250 ג' קוטג' או שייק חלבון <span class="num">~28 ג'</span></li>
+      <li><b>ערב:</b> דג או עדשים + בטטה אפויה + ירקות מוקפצים <span class="num">~32 ג'</span></li>
+    </ul>
+    <p class="why">הכלל: בכל ארוחה חלבון + פחמימה + ירקות + טיפת שומן. זהו כל הסיפור.</p>
+  </div>
+
+  <button class="acc-btn" data-acc="acc-cat"><span>מזון לפי קטגוריה · וכמה</span><span class="chev">▾</span></button>
+  <div class="acc-panel" id="acc-cat" style="display:none">
+    <h4>חלבון · ~30 ג' לארוחה</h4>
+    <ul>
+      <li>150 ג' חזה עוף = <span class="num">46 ג'</span> · 3 ביצים = <span class="num">18 ג'</span></li>
+      <li>קופסת טונה = <span class="num">25 ג'</span> · 250 ג' קוטג' = <span class="num">28 ג'</span></li>
+      <li>יוגורט יווני = <span class="num">17 ג'</span> · סקופ אבקה = <span class="num">24 ג'</span></li>
+      <li>קטניות (עדשים/חומוס), טופו, בקר רזה, דגים</li>
+    </ul>
+    <h4>פחמימה · סביב האימון</h4>
+    <p><span class="good">מומלץ:</span> שיבולת שועל, אורז, תפו"א/בטטה, לחם מלא, קטניות, פירות. ~כף-יד לארוחה.<br><span class="less">פחות:</span> לחם לבן ומאפים, מתוקים, מטוגן, משקאות ממותקים.</p>
+    <h4>שומן בריא · במידה (עתיר קלוריות)</h4>
+    <p>שמן זית, טחינה, אבוקדו, אגוזים וזרעים, דגים שמנים. אחד-שניים ביום. להימנע ממטוגן עמוק ושומן טראנס.</p>
+    <h4>ירקות וסיבים · חצי צלחת, בלי לספור</h4>
+    <ul>
+      <li><b>עגבנייה</b> <span class="why">— ליקופן + ויטמין C + אשלגן</span></li>
+      <li><b>גזר</b> <span class="why">— בטא-קרוטן (ויטמין A) + סיבים, מצוין לנשנוש</span></li>
+      <li><b>עלים ירוקים</b> <span class="why">— ויטמין K, חומצה פולית, ברזל; קערה ללא הגבלה</span></li>
+      <li><b>פלפל אדום</b> <span class="why">— שיא ויטמין C, יותר מתפוז</span></li>
+      <li><b>ברוקולי/כרובית</b> <span class="why">— ויטמין C ו-K + סיבים</span></li>
+      <li><b>מלפפון</b> <span class="why">— מים ונפח, כמעט אפס קלוריות</span></li>
+      <li><b>בצל ושום</b> <span class="why">— פרה-ביוטיקה למעי הבריא</span></li>
+    </ul>
+    <p class="why">הכלל הפשוט: צבעים שונים בצלחת = ויטמינים שונים. מגוון &gt; מושלמות.</p>
+  </div>
+
+  <button class="acc-btn" data-acc="acc-snack"><span>חטיפים ומתוק · נשנוש חכם</span><span class="chev">▾</span></button>
+  <div class="acc-panel" id="acc-snack" style="display:none">
+    <p class="lead">חטיף טוב נותן חלבון או סיבים. המתוק הכי טוב הוא זה שיש בו עוד משהו חוץ מסוכר.</p>
+    <h4>מלוחים / יומיומיים</h4>
+    <ul>
+      <li>יוגורט יווני / קוטג' — מלך החטיפים <span class="num">17–28 ג'</span></li>
+      <li>ביצה קשה <span class="num">6 ג'</span> · הכן כמה מראש</li>
+      <li>חופן שקדים/אגוזים <span class="num">~20 ג'</span> — מדוד, אל תאכל מהשקית</li>
+      <li>חומוס + ירקות חתוכים · טונה על לחם מלא · אדממה</li>
+    </ul>
+    <h4>פירות · מתוק טבעי עם סיבים</h4>
+    <ul>
+      <li>תפוח/אגס — סיבים גבוהים, מחזיק</li>
+      <li>פירות יער — הכי נמוך בסוכר, נוגדי חמצון (מעולה מוקפא)</li>
+      <li>בננה — לפני אימון/טיפוס · תפוז — ויטמין C ונפח</li>
+      <li><b>קומבו מנצח:</b> פרי + חלבון (תפוח + שקדים, בננה + חמאת בוטנים)</li>
+    </ul>
+    <h4>כשבא לך ממש מתוק</h4>
+    <ul>
+      <li>שוקולד מריר 70%+ — ריבוע-שניים</li>
+      <li>יוגורט יווני + פרי + טיפת דבש/קינמון <span class="num">17 ג'</span> — ה-MVP</li>
+      <li>תמרים (1–2) · תמר במילוי אגוז = קינוח שלם</li>
+      <li>שייק/שוקו חלבוני חם — מתוק שסוגר <span class="num">30 ג'</span></li>
+      <li>ענבים/פירות יער קפואים — כמו ממתק קר</li>
+    </ul>
+    <h4>למעט (ה-20%)</h4>
+    <p class="less">ממתקים תעשייתיים, עוגות, חטיפי שוקו-חלב, צ'יפס. והמלכוד הגדול: <b>קלוריות נוזליות</b> — משקאות מתוקים, מיצים, בירה.</p>
+    <p class="why">כשבא לך לנשנש שאל: "יש כאן חלבון או סיבים?". אם לא — שדרג אותו (אגוז/יוגורט) או השאר ל-20% המודע.</p>
+  </div>
+
+  <div class="row" style="margin:18px 4px 10px">
+    <h2 class="section" style="margin:0">הוסף מנה</h2>
+    <button class="btn sm" id="toggle-custom" style="flex:0 0 auto;padding:8px 13px;color:var(--ember);border-color:#3a2620">+ ידני</button>
+  </div>
+  <div class="card" id="custom-form" style="display:none">
+    <input class="cin" id="c-name" placeholder="שם המנה">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input class="cin" id="c-pro" inputmode="numeric" placeholder="חלבון (ג')">
+      <input class="cin" id="c-cal" inputmode="numeric" placeholder="קלוריות (לא חובה)">
+    </div>
+    <div class="exbtns" style="margin-top:9px">
+      <button class="btn" id="c-savelib" style="flex:0 0 auto;padding:10px 13px">שמור לספרייה</button>
+      <button class="btn go" id="c-add">הוסף להיום</button>
+    </div>
+  </div>
+
+  <div class="lib" id="food-lib"></div>
+  <h2 class="section">נאכל היום</h2>
+  <div class="card" id="eaten"></div>
+</section>
+
+<section class="view" id="v-progress">
+  <h2 class="section">משקל גוף</h2>
+  <div class="card">
+    <div class="row"><span class="hint" style="margin:0">משקל אחרון</span><b class="num" id="cur-w" style="font-size:22px">—</b></div>
+    <div class="wlog">
+      <input id="w-input" type="number" inputmode="decimal" placeholder="74.0" step="0.1">
+      <button class="btn go" style="flex:0 0 90px" id="w-save">שמור</button>
+    </div>
+    <svg class="chart" id="w-chart"></svg>
+  </div>
+  <h2 class="section">דרגות נוכחיות</h2>
+  <div class="card" id="prog-list"></div>
+  <h2 class="section">גיבוי נתונים</h2>
+  <div class="card">
+    <p class="hint" style="margin:0">כל הנתונים שמורים רק במכשיר הזה. ייצא גיבוי מדי פעם — או לפני החלפת טלפון.</p>
+    <div class="backup">
+      <button class="btn" id="export-btn">⬇ ייצא גיבוי</button>
+      <button class="btn" id="import-btn">⬆ ייבא גיבוי</button>
+    </div>
+    <input type="file" id="import-file" accept="application/json,.json" style="display:none">
+  </div>
+  <button class="reset" id="reset-btn">אפס את כל הנתונים</button>
+  <p class="data-note">איפוס מוחק הכול — תיעוד, דרגות, משקל, היסטוריה ומנות אישיות. אין שחזור.</p>
+</section>
+
+<nav>
+  <button class="tab active" data-v="today"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>היום</button>
+  <button class="tab" data-v="week"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>שבוע</button>
+  <button class="tab" data-v="workout"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5L17.5 17.5M21 21l-1-1M3 3l1 1m3 3l3 3m4 4l3 3M6.5 17.5L17.5 6.5"/></svg>אימון</button>
+  <button class="tab" data-v="fuel"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a7 7 0 00-7 7c0 3 2 5 2 8a5 5 0 0010 0c0-3 2-5 2-8a7 7 0 00-7-7z"/></svg>תזונה</button>
+  <button class="tab" data-v="progress"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M21 7v5"/></svg>התקדמות</button>
+</nav>
+
+<script>
+const EXERCISES = [
+  {id:'squat', name:'סקוואט', unit:'reps', lo:12, hi:20, sets:3,
+    levels:['בעזרת תמיכה','משקל גוף','טמפו (3 שנ\' ירידה)','קפיצה','Skater / Archer'],
+    muscles:'ירך קדמית, ישבן, מיתר אחורי',
+    form:['רגליים ברוחב כתפיים, בהונות מעט החוצה','דחוף ישבן אחורה־למטה כאילו מתיישב','ברכיים בכיוון הבהונות, גב ניטרלי','דחוף דרך העקבים בחזרה למעלה'],
+    rest:'60–90 שנ\'', yt:'bodyweight squat proper form'},
+  {id:'pushup', name:'שכיבות סמיכה', unit:'reps', lo:8, hi:15, sets:3,
+    levels:['ידיים על קיר/שולחן','על הברכיים','שכיבה מלאה','רגליים מוגבהות','Diamond'],
+    muscles:'חזה, כתף קדמית, יד אחורית',
+    form:['ידיים מעט רחבות מהכתפיים','גוף בקו ישר — בלי שקיעת אגן','מרפקים ~45° מהגוף, לא מתפרקים החוצה','חזה כמעט לרצפה ודחיפה למעלה'],
+    rest:'60–90 שנ\'', yt:'push up proper form'},
+  {id:'ringrow', name:'Ring Rows', unit:'reps', lo:6, hi:12, sets:3,
+    levels:['גוף זקוף','נטוי ~45°','אופקי','רגליים מוגבהות','Archer'],
+    note:'משיכה אופקית — אל תקבע ביום צמוד לטיפוס (אמות/מרפק).',
+    muscles:'גב (רחב גבי, רומבואידים), יד קדמית',
+    form:['גוף מתוח וישר, אחיזה בטבעות','משוך מרפקים אחורה וסחוט שכמות','חזה אל הטבעות','ירידה איטית ומבוקרת'],
+    rest:'60–90 שנ\'', yt:'ring rows technique'},
+  {id:'pullup', name:'מתח (Pull-up)', unit:'reps', lo:3, hi:10, sets:3,
+    levels:['תליה + הפעלת שכמות','Negatives (ירידה איטית)','בעזרת גומייה','מתח מלא','משוקלל / Archer'],
+    note:'משיכה אנכית — אל תקבע ביום צמוד לטיפוס (אמות/אחיזה).',
+    muscles:'גב רחב (lats), יד קדמית (biceps), שכמות',
+    form:['אחיזה ברוחב כתפיים, כפות יד קדימה','התחל מתליה מלאה והפעל שכמות (משוך אותן מטה)','משוך עד שהסנטר עובר את המוט','ירידה איטית ומבוקרת לתליה מלאה'],
+    rest:'90 שנ\'–2 דק\'', yt:'pull up progression beginner'},
+  {id:'dips', name:'מקבילים (Dips)', unit:'reps', lo:6, hi:12, sets:3,
+    levels:['תמיכה על ספסל','Negatives (ירידה איטית)','מלאים','על הטבעות'],
+    note:'⚠ כתף שמאל: עצור על צביטה/כאב חד בבריח. אי-נוחות שרירית רגילה — בסדר.',
+    muscles:'חזה תחתון, יד אחורית, כתף',
+    form:['התחל זרועות ישרות, כתפיים מטה ואחורה','רד עד מרפק בערך 90°','נטייה קלה קדימה לדגש על החזה','אל תרד לתוך כאב כתף'],
+    rest:'90 שנ\'', yt:'parallel bar dips form'},
+  {id:'bss', name:'Bulgarian Split Squat', unit:'reps', lo:10, hi:14, sets:3,
+    levels:['נתמך','מלא','טמפו איטי','קפיצה'], note:'לכל רגל.',
+    muscles:'ירך קדמית, ישבן (עבודה חד־צדדית)',
+    form:['כף רגל אחורית על ספסל מאחור','רוב המשקל על הרגל הקדמית','רד ישר למטה, ברך מעל כף הרגל','דחוף דרך העקב הקדמי'],
+    rest:'60–90 שנ\' (לכל רגל)', yt:'bulgarian split squat form'},
+  {id:'hollow', name:'Hollow Hold', unit:'sec', lo:20, hi:40, sets:3,
+    levels:['ברכיים מקופלות (Tuck)','רגל אחת','Hollow מלא','עם ידיים מעל הראש'],
+    muscles:'בטן וליבה (core)',
+    form:['שכב על הגב, גב תחתון צמוד לרצפה','הרם כתפיים ורגליים מעט מהרצפה','גוף בצורת "בננה" מתוחה','נשום רגיל — אל תעצור נשימה'],
+    rest:'45–60 שנ\'', yt:'hollow body hold tutorial'},
+  {id:'legraise', name:'הרמות רגליים בתליה', unit:'reps', lo:8, hi:12, sets:3,
+    levels:['הרמות ברכיים','ברך לחזה מלא','רגליים ישרות','Toes-to-bar'],
+    muscles:'בטן תחתונה, כופפי ירך',
+    form:['תלייה ממוט, כתפיים פעילות (לא רפויות)','הרם בשליטה בלי לנדנד את הגוף','עצור רגע למעלה','ירידה איטית'],
+    rest:'60 שנ\'', yt:'hanging leg raise form'},
+  {id:'superman', name:'Superman Hold (גב תחתון)', unit:'sec', lo:20, hi:30, sets:3,
+    levels:['בסיסי','החזקה בקצה','+ פתיחת ידיים'],
+    muscles:'גב תחתון (זוקפי גו), ישבן',
+    form:['שכב על הבטן, ידיים שלוחות קדימה','הרם ידיים, חזה ורגליים יחד','סחוט ישבן, מבט לרצפה','החזק ונשום, בלי לקמר בכוח'],
+    rest:'45–60 שנ\'', yt:'superman exercise lower back'},
+];
+
+const FOODS = [
+  {n:'ביצה',p:6,c:78,$:'₪'},{n:'חזה עוף 150ג',p:46,c:250,$:'₪'},
+  {n:'טונה (קופסה)',p:25,c:110,$:'₪'},{n:'קוטג\' 250ג',p:28,c:220,$:'₪'},
+  {n:'יוגורט יווני',p:17,c:120,$:'₪'},{n:'סקופ אבקת חלבון',p:24,c:120,$:'₪₪'},
+  {n:'עדשים (כוס)',p:18,c:230,$:'₪'},{n:'טופו 150ג',p:18,c:170,$:'₪₪'},
+  {n:'שיבולת שועל 80ג',p:11,c:300,$:'₪'},{n:'אורז (כוס)',p:4,c:205,$:'₪'},
+  {n:'בקר טחון 150ג',p:30,c:250,$:'₪₪'},{n:'סלמון 150ג',p:34,c:280,$:'₪₪₪'},
+  {n:'חומוס (מנה)',p:8,c:180,$:'₪'},{n:'שייק חלבון',p:30,c:300,$:'₪₪'},
+  {n:'בננה',p:1,c:105,$:'₪'},{n:'המבורגר בחוץ',p:28,c:650,$:'₪₪₪'},
+];
+
+const DEF_PRO=130, DEF_CAL=2500;
+
+const WEEK = {
+  base:[
+    {d:'ראשון',  t:'אימון גוף מלא',  f:'רגליים · דחיפה · משיכה · ליבה', k:'workout'},
+    {d:'שני',    t:'מנוחה פעילה',    f:'הליכה 20–30 דק\' + מתיחות',    k:'rest'},
+    {d:'שלישי',  t:'אימון גוף מלא',  f:'אותו אימון, דרגה מתקדמת',      k:'workout'},
+    {d:'רביעי',  t:'מנוחה',          f:'התאוששות',                     k:'rest'},
+    {d:'חמישי',  t:'אימון גוף מלא',  f:'פוקוס על נקודות חלשות',         k:'workout'},
+    {d:'שישי',   t:'ספרינטים + ליבה',f:'כוח מתפרץ · קרדיו',            k:'sprint'},
+    {d:'שבת',    t:'מנוחה',          f:'שינה, מתיחות קלות',            k:'rest'},
+  ],
+  climb:[
+    {d:'ראשון',  t:'אימון גוף מלא',         f:'רגליים · דחיפה · משיכה · ליבה', k:'workout'},
+    {d:'שני',    t:'מנוחה פעילה',           f:'הליכה + מתיחות',               k:'rest'},
+    {d:'שלישי',  t:'טיפוס',                 f:'משיכה · אחיזה · ליבה · אמות',    k:'climb'},
+    {d:'רביעי',  t:'מנוחה / הליכה',         f:'תן לאחיזה ולגב להתאושש',        k:'rest'},
+    {d:'חמישי',  t:'גוף מלא (מעט משיכה)',   f:'דחיפה · רגליים · ליבה',        k:'workout'},
+    {d:'שישי',   t:'ספרינטים',              f:'כוח מתפרץ · קרדיו',            k:'sprint'},
+    {d:'שבת',    t:'מנוחה',                 f:'',                             k:'rest'},
+  ]
+};
+const KIND = {
+  workout:{c:'#FF5A36', label:'אימון גוף מלא', foc:'רגליים · דחיפה · משיכה · ליבה', tip:'איכות לפני כמות.'},
+  climb:  {c:'#5FB8C4', label:'טיפוס',         foc:'משיכה · אחיזה · ליבה · אמות',    tip:'יום משיכה ואחיזה — אל תוסיף מתח/Ring Rows.'},
+  sprint: {c:'#9bd16a', label:'ספרינטים',      foc:'כוח מתפרץ · קרדיו',             tip:'חמם היטב את המיתר האחורי. התחל בעלייה.'},
+  rest:   {c:'#5b616e', label:'מנוחה',         foc:'התאוששות',                     tip:'שריר נבנה במנוחה. תן לגוף לעבוד.'},
+};
+
+let S = null;
+const openInfo = new Set();
+let woTab = 'strength';
+let weekOffset = 0;
+let editDay = null;
+let lastSeenDate = null;
+let midnightT = null;
+
+/* ---------- date helpers ---------- */
+function pad(n){ return String(n).padStart(2,'0'); }
+function ymd(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+const todayStr = ()=> ymd(new Date());
+function fromYmd(s){ return new Date(s+'T00:00:00'); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function startOfWeek(d){ const x=new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()-x.getDay()); return x; }
+
+function blankDay(){ return {type:null, done:false, check:{}, pro:0, cal:0, eaten:[]}; }
+
+function blankState(){
+  const ex={};
+  EXERCISES.forEach(e=> ex[e.id]={level:0, reps:Array(e.sets).fill(''), done:false, ready:false, last:null});
+  return {ex, weight:[], days:{}, exDate:null, streak:0, lastWorkout:null,
+    proTarget:DEF_PRO, calTarget:DEF_CAL, myFoods:[], climbWeek:false};
+}
+
+const Store={
+  async load(){
+    try{
+      if(typeof window!=='undefined' && window.storage){
+        const r=await window.storage.get('sulamState'); return r&&r.value?JSON.parse(r.value):null;
+      }
+      const ls=localStorage.getItem('sulamState'); return ls?JSON.parse(ls):null;
+    }catch(e){return null;}
+  },
+  async save(){
+    try{
+      if(typeof window!=='undefined' && window.storage){ await window.storage.set('sulamState', JSON.stringify(S)); return; }
+      localStorage.setItem('sulamState', JSON.stringify(S));
+    }catch(e){}
+  }
+};
+let saveT; const save=()=>{clearTimeout(saveT);saveT=setTimeout(()=>Store.save(),300);};
+
+/* ---------- day record + rollover ---------- */
+function D(){ const t=todayStr(); if(!S.days[t]) S.days[t]=blankDay(); return S.days[t]; }
+
+function rolloverIfNeeded(){
+  const t=todayStr();
+  if(!S.days[t]) S.days[t]=blankDay();
+  if(S.exDate!==t){
+    EXERCISES.forEach(e=>{ if(S.ex[e.id]){ S.ex[e.id].done=false; S.ex[e.id].reps=Array(e.sets).fill(''); } });
+    S.exDate=t;
+  }
+}
+
+function planFor(dateStr){
+  const arr=S.climbWeek?WEEK.climb:WEEK.base;
+  const base=arr[fromYmd(dateStr).getDay()];
+  const rec=S.days[dateStr]||null;
+  const ov=rec&&rec.type;
+  const k=ov?rec.type:base.k;
+  return {
+    d:base.d,
+    t:ov?KIND[k].label:base.t,
+    f:ov?KIND[k].foc:base.f,
+    k, overridden:!!ov, done:!!(rec&&rec.done), date:dateStr
+  };
+}
+const todayPlan=()=>planFor(todayStr());
+
+function setDone(dateStr,val){
+  if(!S.days[dateStr]) S.days[dateStr]=blankDay();
+  const rec=S.days[dateStr], was=rec.done;
+  rec.done=val;
+  if(dateStr===todayStr()){
+    if(val && !was){ if(S.lastWorkout!==dateStr){ S.streak++; S.lastWorkout=dateStr; } }
+    else if(!val && was){ if(S.lastWorkout===dateStr){ S.streak=Math.max(0,S.streak-1); S.lastWorkout=null; } }
+  }
+}
+
+function allExDone(){ return EXERCISES.every(e=>S.ex[e.id] && S.ex[e.id].done); }
+function allChecklistDone(d){
+  return d.done && (d.check.protein || d.pro>=S.proTarget) && d.check.steps && d.check.water && d.check.sleep;
+}
+
+/* ---------- confetti ---------- */
+function confetti(){
+  try{ if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; }catch(e){}
+  const colors=['#FF5A36','#5FB8C4','#9bd16a','#ECE7DA','#d9a06a'];
+  const box=document.createElement('div'); box.className='confetti-box';
+  for(let i=0;i<84;i++){
+    const p=document.createElement('i');
+    const c=colors[i%colors.length];
+    const w=6+Math.random()*6, h=8+Math.random()*8;
+    p.style.cssText='left:'+(Math.random()*100)+'vw;background:'+c+';width:'+w+'px;height:'+h+'px;animation-delay:'+(Math.random()*0.25)+'s;transform:rotate('+(Math.random()*360)+'deg)';
+    box.appendChild(p);
+  }
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(),2600);
+}
+
+/* ---------- Today ---------- */
+function fmt(d){ return new Intl.DateTimeFormat('he-IL',{weekday:'long',day:'numeric',month:'long'}).format(d); }
+
+function renderToday(){
+  rolloverIfNeeded();
+  const d=D();
+  document.getElementById('today-date').textContent=fmt(new Date());
+  const wk=todayPlan();
+  document.getElementById('today-focus').textContent=wk.t;
+  document.getElementById('today-hint').innerHTML=(wk.f?wk.f+' · ':'')+KIND[wk.k].tip;
+  document.getElementById('s-protein').innerHTML=d.pro+'<span style="font-size:13px;color:var(--ash)">/'+S.proTarget+'</span>';
+  document.getElementById('s-protein').className='big num'+(d.pro>=S.proTarget?' on':'');
+  document.getElementById('s-streak').textContent=S.streak;
+  const lw=S.weight[S.weight.length-1];
+  document.getElementById('s-weight').textContent=lw?lw.kg:'—';
+  const items=[['workout','השלמתי אימון'],['protein','הגעתי ליעד חלבון'],['steps','8,000+ צעדים'],['water','שתיתי מספיק מים'],['sleep','7+ שעות שינה']];
+  const cl=document.getElementById('checklist');
+  cl.innerHTML=items.map(([k,label])=>{
+    let on;
+    if(k==='workout') on=d.done;
+    else if(k==='protein') on = d.check.protein || d.pro>=S.proTarget;
+    else on = !!d.check[k];
+    return '<div class="check '+(on?'done':'')+'" data-k="'+k+'">'
+      +'<div class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#1a0f0a" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>'
+      +'<div class="ctext">'+label+'</div></div>';
+  }).join('');
+  cl.querySelectorAll('.check').forEach(el=>el.onclick=()=>{
+    const k=el.dataset.k;
+    const wasAll=allChecklistDone(d);
+    if(k==='workout') setDone(todayStr(), !d.done);
+    else d.check[k]=!d.check[k];
+    save(); renderToday();
+    if(!wasAll && allChecklistDone(D())) confetti();
+  });
+}
+
+/* ---------- Week ---------- */
+function renderWeek(){
+  rolloverIfNeeded();
+  document.getElementById('wk-base').classList.toggle('on',!S.climbWeek);
+  document.getElementById('wk-climb').classList.toggle('on',S.climbWeek);
+
+  const ws=addDays(startOfWeek(new Date()), weekOffset*7);
+  const dates=[]; for(let i=0;i<7;i++) dates.push(ymd(addDays(ws,i)));
+  const todayY=todayStr();
+
+  const lbl=document.getElementById('wk-range');
+  if(weekOffset===0) lbl.textContent='השבוע';
+  else{
+    const f=new Intl.DateTimeFormat('he-IL',{day:'numeric',month:'short'});
+    lbl.textContent=f.format(addDays(ws,0))+' – '+f.format(addDays(ws,6));
+  }
+  const nextBtn=document.getElementById('wk-next');
+  nextBtn.disabled=weekOffset>=0; nextBtn.style.opacity=weekOffset>=0?'.35':'1';
+
+  const tp=planFor(todayY);
+  document.getElementById('wk-today-card').innerHTML=
+    '<div class="lbl">היום · '+tp.d+'</div>'
+    +'<div class="ses" style="color:'+(tp.k==='rest'?'var(--ash)':KIND[tp.k].c)+'">'+tp.t+(tp.done?' <span class="wk-doneflag">✓</span>':'')+'</div>'
+    +'<div class="foc">'+(tp.f?tp.f+' · ':'')+KIND[tp.k].tip+'</div>';
+
+  document.getElementById('wk-list').innerHTML=dates.map(ds=>{
+    const p=planFor(ds);
+    const isToday=(ds===todayY), isFuture=(ds>todayY), editing=(editDay===ds);
+    let row='<div class="wk-day'+(isToday?' today':'')+'" data-day="'+ds+'">'
+      +'<span class="wk-dot" style="background:'+KIND[p.k].c+'"></span>'
+      +'<span class="wk-dn">'+p.d+'</span>'
+      +'<div class="wk-info"><div class="wk-tt">'+p.t+(p.overridden?' <span class="wk-ovr">הוחלף</span>':'')+'</div>'
+        +(p.f?'<div class="wk-ff">'+p.f+'</div>':'')+'</div>'
+      +(p.done?'<span class="wk-check">✓</span>':(isToday?'<span class="wk-now">היום</span>':''))
+      +'</div>';
+    if(editing) row+=weekEditor(ds,p,isFuture);
+    return row;
+  }).join('');
+
+  document.querySelectorAll('#wk-list .wk-day').forEach(el=>el.onclick=(ev)=>{
+    if(ev.target.closest('.wk-ed')) return;
+    const ds=el.dataset.day; editDay=(editDay===ds?null:ds); renderWeek();
+  });
+  bindWeekEditor();
+}
+function weekEditor(ds,p,isFuture){
+  const types=[['','ברירת מחדל'],['workout','כוח'],['sprint','ספרינטים'],['climb','טיפוס'],['rest','מנוחה']];
+  const cur=(S.days[ds]&&S.days[ds].type)||'';
+  const chips=types.map(([v,l])=>'<button class="wk-chip'+(cur===v?' on':'')+'" data-set="'+ds+'|'+v+'">'+l+'</button>').join('');
+  const doneBtn=isFuture?'':'<button class="wk-donebtn'+(p.done?' on':'')+'" data-done="'+ds+'">'+(p.done?'✓ בוצע — הקש לביטול':'סמן כבוצע')+'</button>';
+  return '<div class="wk-ed">'
+    +'<div class="wk-ed-l">סוג אימון</div><div class="wk-chips">'+chips+'</div>'+doneBtn+'</div>';
+}
+function bindWeekEditor(){
+  document.querySelectorAll('[data-set]').forEach(b=>b.onclick=(ev)=>{
+    ev.stopPropagation();
+    const parts=b.dataset.set.split('|'); const ds=parts[0], v=parts[1];
+    if(!S.days[ds]) S.days[ds]=blankDay();
+    S.days[ds].type = v||null;
+    save(); renderWeek(); renderToday();
+  });
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=(ev)=>{
+    ev.stopPropagation();
+    const ds=b.dataset.done, cur=!!(S.days[ds]&&S.days[ds].done);
+    setDone(ds,!cur); save(); renderWeek(); renderToday();
+  });
+}
+
+/* ---------- Workout ---------- */
+function ladderHTML(e,st){
+  let h='<div class="ladder">';
+  for(let i=0;i<e.levels.length;i++){
+    let cls='rung'; if(i<st.level)cls+=' done'; if(i===st.level){cls+=' cur'+(st.ready?' ready':'');}
+    h+='<div class="'+cls+'"></div>';
+  }
+  return h+'</div>';
+}
+function infoHTML(e){
+  if(!openInfo.has(e.id)) return '';
+  const steps='<ol>'+e.form.map(f=>'<li>'+f+'</li>').join('')+'</ol>';
+  const yt='https://www.youtube.com/results?search_query='+encodeURIComponent(e.yt);
+  return '<div class="exinfo">'
+    +'<div class="muscle">שרירים: <small>'+e.muscles+'</small></div>'
+    +steps
+    +'<div class="restline">מנוחה בין סטים: <b>'+e.rest+'</b></div>'
+    +'<a class="ytlink" target="_blank" rel="noopener" href="'+yt+'">▶ סרטון הדגמה ביוטיוב</a>'
+    +'</div>';
+}
+function renderWorkout(){
+  const list=document.getElementById('ex-list');
+  list.innerHTML=EXERCISES.map(e=>{
+    const st=S.ex[e.id];
+    const unit=e.unit==='sec'?'שנ\'':'חז\'';
+    const setInputs=st.reps.map((v,i)=>'<input class="setin" inputmode="numeric" data-ex="'+e.id+'" data-i="'+i+'" value="'+v+'" placeholder="'+e.lo+'">').join('');
+    const lastTxt = st.last ? ('פעם שעברה: '+(st.last.filter(x=>x!=='').join(' · ')||'—')) : '';
+    let action;
+    if(st.done && st.ready){
+      action='<button class="btn advance" data-adv="'+e.id+'">⬆ עלה דרגה</button><button class="btn sm" data-undo="'+e.id+'">בטל</button>';
+    } else if(st.done){
+      action='<div class="done-tag">✓ בוצע</div><button class="btn sm" data-undo="'+e.id+'">בטל</button>';
+    } else {
+      action='<button class="btn ghost" data-down="'+e.id+'" aria-label="הורד דרגה">▾</button><button class="btn go" data-log="'+e.id+'">סמן בוצע</button>';
+    }
+    return '<div class="card exc">'
+      +'<div class="ex-head"><span class="ex-name">'+e.name+'</span><div class="ex-head-r"><span class="ex-badge">דרגה '+(st.level+1)+'/'+e.levels.length+'</span><button class="btn info'+(openInfo.has(e.id)?' open':'')+'" data-info="'+e.id+'" aria-label="מידע על התרגיל">i</button></div></div>'
+      +'<div class="ex-meta">'+e.levels[st.level]+' <b>· '+e.sets+'×'+e.lo+'–'+e.hi+' '+unit+'</b></div>'
+      +(lastTxt?'<div class="ex-last">'+lastTxt+'</div>':'')
+      +(e.note?'<div class="ex-note">'+e.note+'</div>':'')
+      +infoHTML(e)
+      +ladderHTML(e,st)
+      +'<div class="sets">'+setInputs+'</div>'
+      +'<div class="exbtns">'+action+'</div></div>';
+  }).join('');
+
+  list.querySelectorAll('[data-info]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.info;
+    if(openInfo.has(id)) openInfo.delete(id); else openInfo.add(id);
+    renderWorkout();
+  });
+  list.querySelectorAll('.setin').forEach(inp=>inp.oninput=()=>{
+    S.ex[inp.dataset.ex].reps[+inp.dataset.i]=inp.value; save();
+  });
+  list.querySelectorAll('[data-log]').forEach(b=>b.onclick=()=>{
+    const e=EXERCISES.find(x=>x.id===b.dataset.log), st=S.ex[e.id];
+    const wasAll=allExDone();
+    st.done=true; st.last=st.reps.slice();
+    const allHit=st.reps.every(r=> r!=='' && (+r)>=e.hi);
+    st.ready = allHit && st.level < e.levels.length-1;
+    save(); renderWorkout();
+    if(allExDone() && !wasAll){
+      if(!D().done) setDone(todayStr(), true);
+      renderToday(); confetti();
+    }
+  });
+  list.querySelectorAll('[data-undo]').forEach(b=>b.onclick=()=>{
+    const st=S.ex[b.dataset.undo]; st.done=false; st.ready=false; save(); renderWorkout();
+  });
+  list.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>{
+    const st=S.ex[b.dataset.adv]; st.level++; st.ready=false; st.done=false; st.last=null;
+    st.reps=st.reps.map(()=>''); save(); renderWorkout(); renderProgress();
+  });
+  list.querySelectorAll('[data-down]').forEach(b=>b.onclick=()=>{
+    const st=S.ex[b.dataset.down]; if(st.level>0){st.level--; st.ready=false;} save(); renderWorkout(); renderProgress();
+  });
+}
+function showWo(t){
+  woTab=t;
+  document.getElementById('wo-s').classList.toggle('on',t==='strength');
+  document.getElementById('wo-sp').classList.toggle('on',t==='sprint');
+  document.getElementById('wo-strength').style.display=t==='strength'?'block':'none';
+  document.getElementById('wo-sprint').style.display=t==='sprint'?'block':'none';
+}
+
+/* ---------- Fuel ---------- */
+function addToToday(f){
+  const d=D();
+  const wasFull = d.pro>=S.proTarget && d.cal>=S.calTarget;
+  d.pro+=(+f.p||0); d.cal+=(+f.c||0);
+  d.eaten.push({n:f.n,p:+f.p||0,c:+f.c||0});
+  save(); renderFuel(); renderToday();
+  if(!wasFull && d.pro>=S.proTarget && d.cal>=S.calTarget) confetti();
+}
+function tile(f,t,i,rm){
+  return '<div class="food" data-add="'+t+':'+i+'">'
+    +(rm?'<button class="mfrm" data-mfrm="'+i+'">×</button>':'')
+    +(f.$?'<span class="cost">'+f.$+'</span>':'')
+    +'<div class="fn">'+f.n+'</div>'
+    +'<div class="fm"><span class="fp">'+f.p+'ג חלבון</span>'+(f.c?' · '+f.c+' קל\'':'')+'</div></div>';
+}
+function renderFuel(){
+  const d=D();
+  document.getElementById('g-pro').textContent=d.pro;
+  document.getElementById('g-cal').textContent=d.cal;
+  document.getElementById('t-pro').textContent=S.proTarget;
+  document.getElementById('t-cal').textContent=S.calTarget;
+  document.getElementById('f-pro').style.width=Math.min(100,d.pro/S.proTarget*100)+'%';
+  document.getElementById('f-cal').style.width=Math.min(100,d.cal/S.calTarget*100)+'%';
+  const libEl=document.getElementById('food-lib');
+  let html=FOODS.map((f,i)=>tile(f,'f',i,false)).join('');
+  html+=S.myFoods.map((f,i)=>tile(f,'mf',i,true)).join('');
+  libEl.innerHTML=html;
+  libEl.querySelectorAll('[data-add]').forEach(el=>el.onclick=()=>{
+    const parts=el.dataset.add.split(':'); const f=parts[0]==='f'?FOODS[+parts[1]]:S.myFoods[+parts[1]]; if(f)addToToday(f);
+  });
+  libEl.querySelectorAll('[data-mfrm]').forEach(b=>b.onclick=(ev)=>{
+    ev.stopPropagation(); S.myFoods.splice(+b.dataset.mfrm,1); save(); renderFuel();
+  });
+  const eaten=document.getElementById('eaten');
+  if(!d.eaten.length){eaten.innerHTML='<div class="empty">עוד לא הוספת כלום היום.<br>הקש על מנה כדי לעקוב.</div>';return;}
+  eaten.innerHTML=d.eaten.map((f,i)=>'<div class="added"><span>'+f.n+'</span>'
+    +'<span style="display:flex;align-items:center;gap:10px"><span class="num">'+f.p+'ג · '+f.c+'קל\'</span>'
+    +'<button class="rm" data-rm="'+i+'">×</button></span></div>').join('');
+  eaten.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{
+    const f=d.eaten.splice(+b.dataset.rm,1)[0]; d.pro-=f.p; d.cal-=f.c; save(); renderFuel(); renderToday();
+  });
+}
+function commitCustom(toLib){
+  const name=document.getElementById('c-name').value.trim();
+  const pro=parseFloat(document.getElementById('c-pro').value);
+  const cal=parseFloat(document.getElementById('c-cal').value);
+  if(!name||isNaN(pro)){ alert('שם וחלבון הם שדות חובה'); return; }
+  const f={n:name,p:Math.round(pro),c:isNaN(cal)?0:Math.round(cal),$:''};
+  if(toLib) S.myFoods.push({n:f.n,p:f.p,c:f.c,$:''});
+  addToToday(f);
+  document.getElementById('c-name').value=''; document.getElementById('c-pro').value=''; document.getElementById('c-cal').value='';
+  document.getElementById('custom-form').style.display='none';
+}
+function setupFuel(){
+  document.getElementById('toggle-custom').onclick=()=>{
+    const f=document.getElementById('custom-form'); f.style.display=(f.style.display==='none'?'block':'none');
+  };
+  document.getElementById('c-add').onclick=()=>commitCustom(false);
+  document.getElementById('c-savelib').onclick=()=>commitCustom(true);
+  document.getElementById('edit-targets').onclick=()=>{
+    const p=prompt('יעד חלבון (גרם):',S.proTarget); if(p!==null && +p>0) S.proTarget=Math.round(+p);
+    const c=prompt('יעד קלוריות:',S.calTarget); if(c!==null && +c>0) S.calTarget=Math.round(+c);
+    save(); renderFuel(); renderToday();
+  };
+  document.querySelectorAll('.acc-btn').forEach(b=>b.onclick=()=>{
+    const panel=document.getElementById(b.dataset.acc);
+    const open=panel.style.display==='none';
+    panel.style.display=open?'block':'none'; b.classList.toggle('open',open);
+  });
+}
+
+/* ---------- Progress + backup ---------- */
+function renderProgress(){
+  const lw=S.weight[S.weight.length-1];
+  document.getElementById('cur-w').textContent=lw?lw.kg+' ק"ג':'—';
+  drawChart();
+  document.getElementById('prog-list').innerHTML=EXERCISES.map(e=>{
+    const st=S.ex[e.id];
+    return '<div class="prog-item">'+ladderHTML(e,st)
+      +'<span class="pi-name">'+e.name+'</span>'
+      +'<span class="pi-lvl">'+e.levels[st.level]+'</span></div>';
+  }).join('');
+}
+function drawChart(){
+  const svg=document.getElementById('w-chart'); const W=svg.clientWidth||320, H=140, pad=20;
+  const d=S.weight;
+  if(d.length<2){svg.innerHTML='<text x="'+(W/2)+'" y="'+(H/2)+'" fill="#969cab" font-size="13" text-anchor="middle" font-family="Heebo">תיעוד 2+ שקילות יראה כאן גרף מגמה</text>';return;}
+  const ys=d.map(x=>x.kg), min=Math.min(...ys)-0.5, max=Math.max(...ys)+0.5;
+  const X=i=> pad + i*(W-2*pad)/(d.length-1);
+  const Y=v=> pad + (1-(v-min)/(max-min))*(H-2*pad);
+  let path=d.map((x,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(x.kg).toFixed(1)).join(' ');
+  let dots=d.map((x,i)=>'<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(x.kg).toFixed(1)+'" r="3.5" fill="#FF5A36"/>').join('');
+  svg.innerHTML='<path d="'+path+'" fill="none" stroke="#FF5A36" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+dots
+    +'<text x="'+X(d.length-1)+'" y="'+(Y(d[d.length-1].kg)-10)+'" fill="#ECE7DA" font-size="13" font-family="JetBrains Mono" text-anchor="middle">'+d[d.length-1].kg+'</text>';
+}
+function exportData(){
+  try{
+    const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='sulam-backup-'+todayStr()+'.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }catch(e){ alert('הייצוא נכשל. נסה שוב מהאתר המותקן.'); }
+}
+function importData(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const obj=JSON.parse(reader.result);
+      if(!obj || !obj.ex){ alert('הקובץ לא נראה כמו גיבוי תקין של סולם.'); return; }
+      if(!confirm('לייבא את הגיבוי? הנתונים הנוכחיים במכשיר יוחלפו.')) return;
+      S=obj; normalizeState(); rolloverIfNeeded(); save();
+      renderProgress(); renderFuel(); show('today');
+      alert('הגיבוי יובא בהצלחה.');
+    }catch(e){ alert('קריאת הקובץ נכשלה.'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------- nav ---------- */
+function renderActive(v){
+  if(v==='today')renderToday(); else if(v==='week')renderWeek(); else if(v==='workout'){showWo(woTab);renderWorkout();}
+  else if(v==='fuel')renderFuel(); else if(v==='progress')renderProgress();
+}
+function show(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('v-'+v).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
+  renderActive(v);
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>show(t.dataset.v));
+
+document.getElementById('wk-help').onclick=function(){
+  const p=document.getElementById('wk-panel'); const open=p.style.display==='none';
+  p.style.display=open?'block':'none'; this.classList.toggle('open',open);
+};
+document.getElementById('wk-base').onclick=()=>{ S.climbWeek=false; save(); renderWeek(); renderToday(); };
+document.getElementById('wk-climb').onclick=()=>{ S.climbWeek=true; save(); renderWeek(); renderToday(); };
+document.getElementById('wk-prev').onclick=()=>{ weekOffset--; editDay=null; renderWeek(); };
+document.getElementById('wk-next').onclick=()=>{ if(weekOffset<0){ weekOffset++; editDay=null; renderWeek(); } };
+document.getElementById('wo-s').onclick=()=>showWo('strength');
+document.getElementById('wo-sp').onclick=()=>showWo('sprint');
+
+document.getElementById('w-save').onclick=()=>{
+  const inp=document.getElementById('w-input'); const v=parseFloat(inp.value);
+  if(!v||v<30||v>250)return;
+  S.weight.push({date:todayStr(),kg:v}); inp.value=''; save(); renderProgress(); renderToday();
+};
+document.getElementById('export-btn').onclick=exportData;
+document.getElementById('import-btn').onclick=()=>document.getElementById('import-file').click();
+document.getElementById('import-file').onchange=(e)=>{ if(e.target.files&&e.target.files[0]) importData(e.target.files[0]); e.target.value=''; };
+document.getElementById('reset-btn').onclick=()=>{
+  if(confirm('לאפס את כל הנתונים — תיעוד, דרגות, משקל, היסטוריה ומנות אישיות? אין חזרה.')){
+    S=blankState(); rolloverIfNeeded(); save(); renderFuel(); show('today');
+  }
+};
+
+/* ---------- date-change watchers ---------- */
+function handleDateChange(){
+  rolloverIfNeeded(); save();
+  const active=document.querySelector('.view.active');
+  if(active) renderActive(active.id.replace('v-',''));
+}
+function checkDate(){ if(todayStr()!==lastSeenDate){ lastSeenDate=todayStr(); handleDateChange(); } }
+function scheduleMidnight(){
+  const now=new Date();
+  const next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,2);
+  clearTimeout(midnightT);
+  midnightT=setTimeout(()=>{ checkDate(); scheduleMidnight(); }, next-now);
+}
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkDate(); });
+window.addEventListener('focus',checkDate);
+
+/* ---------- init / migration ---------- */
+function normalizeState(){
+  if(!S.ex) S.ex={};
+  EXERCISES.forEach(e=>{
+    if(!S.ex[e.id]) S.ex[e.id]={level:0,reps:Array(e.sets).fill(''),done:false,ready:false,last:null};
+    else if(S.ex[e.id].last===undefined) S.ex[e.id].last=null;
+  });
+  if(!S.weight) S.weight=[];
+  if(S.proTarget===undefined) S.proTarget=DEF_PRO;
+  if(S.calTarget===undefined) S.calTarget=DEF_CAL;
+  if(!S.myFoods) S.myFoods=[];
+  if(S.climbWeek===undefined) S.climbWeek=false;
+  if(S.streak===undefined) S.streak=0;
+  if(S.lastWorkout===undefined) S.lastWorkout=null;
+  if(!S.days || typeof S.days!=='object'){
+    S.days={};
+    if(S.day && S.day.date){
+      S.days[S.day.date]={
+        type:null,
+        done:!!(S.day.check && S.day.check.workout),
+        check:S.day.check||{},
+        pro:S.day.pro||0, cal:S.day.cal||0, eaten:S.day.eaten||[]
+      };
+    }
+  }
+  delete S.day;
+  if(S.exDate===undefined) S.exDate=null;
+}
+
+(async function init(){
+  const loaded=await Store.load();
+  S = loaded || blankState();
+  if(!S.ex) S=blankState();
+  normalizeState();
+  rolloverIfNeeded();
+  save();
+  setupFuel();
+  lastSeenDate=todayStr();
+  scheduleMidnight();
+  show('today');
+})();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
